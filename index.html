@@ -67,33 +67,34 @@
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
 
   <!-- TOP NAVBAR --> 
-<header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm transition-all"> 
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4"> 
+<header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm transition-all w-full"> 
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4 text-left"> 
     
     <!-- Site Logo / Branding --> 
-    <a href="https://jobs.jobigator.com" class="flex items-center gap-3 group"> 
+    <a href="https://jobigator.com" class="flex items-center justify-start text-left gap-3 group border-0 p-0 m-0 decoration-none"> 
       
-      <!-- New Image Logo Container (Replacing the green shape & icon) -->
-      <div class="w-11 h-11 flex items-center justify-center group-hover:scale-105 transition-transform overflow-hidden rounded-xl">
-        <img src="logo.png" alt="Jobs by Jobigator Logo" class="w-full h-full object-contain" />
+      <!-- Logo Container -->
+      <div class="w-11 h-11 flex items-center justify-center group-hover:scale-105 transition-transform overflow-hidden rounded-xl shrink-0 m-0">
+        <img src="logo.png" alt="Jobigator Logo" class="w-full h-full object-contain block" />
       </div> 
       
-      <div class="flex flex-col"> 
-        <div class="flex items-center gap-1.5"> 
-          <span class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">Jobs</span> 
-          <a href="https://jobigator.com"> 
-            <span class="text-xs font-bold px-2 py-0.5 bg-brand-100 text-brand-800 rounded-full">by Jobigator</span> 
-          </a> 
+      <!-- Text Container -->
+      <div class="flex flex-col items-start justify-center text-left m-0 p-0" style="text-align: left !important; align-items: flex-start !important;"> 
+        <div class="flex items-center justify-start text-left gap-1.5 flex-row w-full"> 
+          <span class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none text-left block">Jobs</span> 
+          <span class="text-xs font-bold px-2 py-0.5 bg-brand-100 text-brand-800 rounded-full whitespace-nowrap inline-block text-left">by Jobigator</span> 
         </div> 
-        <span class="text-xs font-medium text-slate-500 tracking-wide mt-1">Find • Get Help • Apply</span> </div> 
+        <span class="text-xs font-medium text-slate-500 tracking-wide mt-1 text-left block w-full">Find • Get Help • Apply</span> 
+      </div> 
     </a> 
     
     <!-- User Profile / Auth Area --> 
-    <div id="authArea"> 
+    <div id="authArea" class="ml-auto"> 
       <!-- JS injects Profile or Sign In Button --> 
     </div> 
   </div> 
 </header>
+
 
   <!-- HERO & SEARCH SECTION -->
   <section id="searchSection" class="bg-gradient-to-b from-brand-50/70 via-emerald-50/30 to-slate-50 py-10 sm:py-14 border-b border-slate-200">
