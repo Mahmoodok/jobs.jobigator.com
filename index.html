@@ -249,8 +249,8 @@
         <i class="fa-solid fa-user-plus"></i>
       </div>
 
-      <h2 class="text-2xl font-black text-slate-900 mb-1">Create Free Profile</h2>
-      <p class="text-sm text-slate-500 font-medium mb-6">Sign up once to save favorite jobs and manage your applications.</p>
+      <h2 class="text-2xl font-black text-slate-900 mb-1">Free Sign Up/Sign In</h2>
+      <p class="text-sm text-slate-500 font-medium mb-6">Sign up once to save favorite jobs and manage your applications. If you have already registered, simply enter the details and click the button.</p>
 
       <form id="signUpForm" onsubmit="handleSignUpSubmit(event)" class="space-y-4">
         <div>
@@ -585,29 +585,23 @@ function showDirectJobBanner() {
     }
 
     function shareJob(jobId) {
-  // Finds the job details from your allJobs array
+  // 1. Find the job details from your allJobs array
   const job = allJobs.find(j => j.jobId === jobId);
   if (!job) return;
 
-  // Constructs a deep link pointing directly to this job ID
+  // 2. Construct the deep link pointing directly to this job ID
   const baseUrl = window.location.origin + window.location.pathname;
   const shareUrl = `${baseUrl}?jobId=${encodeURIComponent(jobId)}`;
 
-  const shareText = `Check out this job posting for ${job.jobTitle} at ${job.company}:\n${shareUrl}`;
+  // 3. Format the pre-filled text with the specific job details and link
+  const text = `Check out this opening for ${job.jobTitle} at ${job.company}: ${shareUrl}`;
 
-  if (navigator.share) {
-    navigator.share({
-      title: `${job.jobTitle} - ${job.company}`,
-      text: `Check out this job posting for ${job.jobTitle} at ${job.company}:`,
-      url: shareUrl
-    }).catch(err => console.log("Sharing cancelled or failed:", err));
+  // 4. Prompt user to pick WhatsApp or LinkedIn
+  const choice = confirm("Click OK to share on WhatsApp, or Cancel to share on LinkedIn.");
+  if (choice) {
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   } else {
-    // Fallback: Copy to clipboard if Web Share API is not supported
-    navigator.clipboard.writeText(shareText).then(() => {
-      alert("Job link copied to clipboard!");
-    }).catch(() => {
-      prompt("Copy this job link:", shareUrl);
-    });
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank');
   }
 }
 
@@ -640,7 +634,7 @@ function showDirectJobBanner() {
       } catch (err) {
         alert("An error occurred during sign up.");
       } finally {
-        btn.innerText = "Complete Free Sign-Up";
+        btn.innerText = "Free Sign-Up";
         btn.disabled = false;
       }
     }
