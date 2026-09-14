@@ -3,19 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jobs | Jobigator</title>
+  <title>Jobs by Jobigator | Find Your Next Career Opportunity</title>
+  
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
           colors: {
             brand: {
               50: '#f0fdf4',
               100: '#dcfce7',
+              200: '#bbf7d0',
+              500: '#22c55e',
               600: '#16a34a',
               700: '#15803d',
+              800: '#166534',
               900: '#14532d',
             }
           }
@@ -24,14 +40,25 @@
     }
   </script>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
 
   <!-- TOP NAVBAR -->
-  <header class="bg-white border-b sticky top-0 z-30 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span class="text-2xl font-black text-brand-600 tracking-tight">Jobigator<span class="text-xs text-gray-400 font-normal">.com</span></span>
-      </div>
+  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      
+      <!-- Site Logo / Branding -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center text-white shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform">
+          <i class="fa-solid fa-briefcase text-xl"></i>
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1.5">
+            <span class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">Jobs</span>
+            <span class="text-xs font-bold px-2 py-0.5 bg-brand-100 text-brand-800 rounded-full">by Jobigator</span>
+          </div>
+          <span class="text-xs font-medium text-slate-500 tracking-wide mt-1">Verify • Apply • Grow</span>
+        </div>
+      </a>
 
       <!-- User Profile / Auth Area -->
       <div id="authArea">
@@ -40,126 +67,208 @@
     </div>
   </header>
 
-  <!-- SEARCH & FILTERS SECTION -->
-  <section class="bg-gradient-to-b from-brand-50 to-gray-50 py-8 border-b">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+  <!-- HERO & SEARCH SECTION -->
+  <section class="bg-gradient-to-b from-brand-50/70 via-emerald-50/30 to-slate-50 py-10 sm:py-14 border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <!-- Search Input Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div class="relative">
-          <i class="fa-solid fa-briefcase absolute left-3 top-3.5 text-gray-400"></i>
-          <input type="text" id="searchRole" placeholder="Role, keyword, or title" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-600 focus:outline-none">
+      <!-- Hero Heading -->
+      <div class="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+        <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-3">
+          Discover Opportunities Built For You
+        </h1>
+        <p class="text-base sm:text-lg text-slate-600 font-medium">
+          Browse active listings, apply directly, or get personalized guidance over WhatsApp.
+        </p>
+      </div>
+
+      <!-- Search Box Container -->
+      <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200/80 space-y-4 max-w-5xl mx-auto">
+        
+        <!-- Search Input Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-slate-400 text-base"></i>
+            <input type="text" id="searchRole" placeholder="Role, category, or title" class="w-full pl-11 pr-4 py-3.5 bg-slate-50 hover:bg-slate-100/80 focus:bg-white rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-600 focus:border-brand-600 text-base font-medium transition outline-none">
+          </div>
+          <div class="relative">
+            <i class="fa-solid fa-building absolute left-4 top-4 text-slate-400 text-base"></i>
+            <input type="text" id="searchCompany" placeholder="Company name" class="w-full pl-11 pr-4 py-3.5 bg-slate-50 hover:bg-slate-100/80 focus:bg-white rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-600 focus:border-brand-600 text-base font-medium transition outline-none">
+          </div>
+          <div class="relative">
+            <i class="fa-solid fa-location-dot absolute left-4 top-4 text-slate-400 text-base"></i>
+            <input type="text" id="searchLocation" placeholder="Location or Remote" class="w-full pl-11 pr-4 py-3.5 bg-slate-50 hover:bg-slate-100/80 focus:bg-white rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-600 focus:border-brand-600 text-base font-medium transition outline-none">
+          </div>
         </div>
-        <div class="relative">
-          <i class="fa-solid fa-building absolute left-3 top-3.5 text-gray-400"></i>
-          <input type="text" id="searchCompany" placeholder="Company name" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-600 focus:outline-none">
-        </div>
-        <div class="relative">
-          <i class="fa-solid fa-location-dot absolute left-3 top-3.5 text-gray-400"></i>
-          <input type="text" id="searchLocation" placeholder="Location or Remote" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-600 focus:outline-none">
+
+        <!-- Dropdown Filters Bar -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-slate-100">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <select id="filterType" class="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-brand-600 outline-none cursor-pointer transition">
+              <option value="">All Job Types</option>
+              <option value="Full Time">Full Time</option>
+              <option value="Part Time">Part Time</option>
+              <option value="Contract">Contract</option>
+              <option value="Remote">Remote</option>
+              <option value="Internship">Internship</option>
+            </select>
+
+            <select id="filterSalary" class="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-brand-600 outline-none cursor-pointer transition">
+              <option value="">All Salary Ranges</option>
+              <option value="Disclosed">Salary Mentioned</option>
+            </select>
+          </div>
+
+          <button onclick="resetFilters()" class="text-sm text-brand-700 hover:text-brand-900 font-bold flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg hover:bg-brand-50 transition">
+            <i class="fa-solid fa-rotate-left"></i> Clear Filters
+          </button>
         </div>
       </div>
 
-      <!-- Dropdown Filters -->
-      <div class="flex flex-wrap items-center gap-3 pt-2">
-        <select id="filterType" class="px-3 py-2 bg-white rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-brand-600">
-          <option value="">All Job Types</option>
-          <option value="Full Time">Full Time</option>
-          <option value="Part Time">Part Time</option>
-          <option value="Contract">Contract</option>
-          <option value="Remote">Remote</option>
-          <option value="Internship">Internship</option>
-        </select>
-
-        <select id="filterSalary" class="px-3 py-2 bg-white rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-brand-600">
-          <option value="">All Salary Ranges</option>
-          <option value="Disclosed">Salary Mentioned</option>
-        </select>
-
-        <button onclick="resetFilters()" class="text-xs text-brand-700 font-semibold hover:underline ml-auto">Clear Filters</button>
-      </div>
     </div>
   </section>
 
   <!-- MAIN JOB LISTING AREA -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
-    <div id="loader" class="text-center py-16">
-      <i class="fa-solid fa-circle-notch animate-spin text-4xl text-brand-600"></i>
-      <p class="text-gray-500 mt-2 text-sm">Fetching fresh opportunities...</p>
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
+    
+    <!-- Loader -->
+    <div id="loader" class="text-center py-20">
+      <i class="fa-solid fa-circle-notch animate-spin text-5xl text-brand-600"></i>
+      <p class="text-slate-600 font-semibold mt-4 text-base">Fetching live job openings...</p>
     </div>
 
-    <div id="jobGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+    <!-- Job Grid -->
+    <div id="jobGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 hidden">
       <!-- Cards rendered via JS -->
     </div>
 
-    <div id="noResults" class="hidden text-center py-16">
-      <i class="fa-solid fa-folder-open text-4xl text-gray-300 mb-2"></i>
-      <p class="text-gray-600 font-medium">No matching active jobs found.</p>
+    <!-- No Results State -->
+    <div id="noResults" class="hidden text-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm max-w-xl mx-auto">
+      <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+        <i class="fa-solid fa-folder-open text-3xl"></i>
+      </div>
+      <h3 class="text-xl font-bold text-slate-800 mb-1">No Matching Jobs Found</h3>
+      <p class="text-slate-500 font-medium text-sm mb-6">Try broadening your search terms or clearing current filters.</p>
+      <button onclick="resetFilters()" class="px-5 py-2.5 bg-brand-600 text-white font-bold text-sm rounded-xl hover:bg-brand-700 shadow-md transition">
+        Reset Search Filters
+      </button>
     </div>
   </main>
 
+  <!-- FOOTER -->
+  <footer class="bg-slate-900 text-slate-300 border-t border-slate-800 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+        
+        <!-- Column 1: Brand -->
+        <div class="space-y-4 md:col-span-2">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
+              <i class="fa-solid fa-briefcase"></i>
+            </div>
+            <span class="text-2xl font-black text-white tracking-tight">Jobs <span class="text-brand-500 font-bold text-sm">by Jobigator</span></span>
+          </div>
+          <p class="text-slate-400 text-sm leading-relaxed max-w-sm">
+            Jobigator connects active candidates with vetted job opportunities. Get direct application links or 1-on-1 assistance right on WhatsApp.
+          </p>
+        </div>
+
+        <!-- Column 2: Quick Links -->
+        <div>
+          <h4 class="text-white text-base font-bold mb-4">Quick Links</h4>
+          <ul class="space-y-2.5 text-sm font-medium">
+            <li><a href="#" onclick="resetFilters()" class="hover:text-brand-400 transition">Browse All Jobs</a></li>
+            <li><a href="#" onclick="openModal('signUpModal')" class="hover:text-brand-400 transition">Free Candidate Sign Up</a></li>
+            <li><a href="https://wa.me/917013681638" target="_blank" class="hover:text-brand-400 transition">Contact Support</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Contact & Help -->
+        <div>
+          <h4 class="text-white text-base font-bold mb-4">Get Assistance</h4>
+          <p class="text-slate-400 text-sm mb-3">Need help applying or finding specific roles?</p>
+          <a href="https://wa.me/917013681638" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition">
+            <i class="fa-brands fa-whatsapp text-lg"></i> Chat on WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <div class="pt-8 border-t border-slate-800 text-center sm:flex sm:items-center sm:justify-between text-xs text-slate-500">
+        <p>© 2026 Jobigator.com. All rights reserved.</p>
+        <p class="mt-2 sm:mt-0">Powered by Google Apps Script & GitHub Pages</p>
+      </div>
+    </div>
+  </footer>
+
   <!-- SIGN UP MODAL -->
-  <div id="signUpModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative">
-      <h2 class="text-2xl font-bold text-gray-900 mb-1">Welcome to Jobigator</h2>
-      <p class="text-sm text-gray-500 mb-6">Create a free account to save jobs and track your applications.</p>
+  <div id="signUpModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative border border-slate-100">
+      <button onclick="closeModal('signUpModal')" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+
+      <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center mb-4 text-2xl">
+        <i class="fa-solid fa-user-plus"></i>
+      </div>
+
+      <h2 class="text-2xl font-black text-slate-900 mb-1">Create Free Profile</h2>
+      <p class="text-sm text-slate-500 font-medium mb-6">Sign up once to save favorite jobs and manage your applications.</p>
 
       <form id="signUpForm" onsubmit="handleSignUpSubmit(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Full Name</label>
-          <input type="text" id="suName" required placeholder="e.g. Rahul Sharma" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-600 outline-none">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Full Name</label>
+          <input type="text" id="suName" required placeholder="e.g. Rahul Sharma" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-600 focus:border-brand-600 text-base font-medium outline-none transition">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">WhatsApp Number</label>
-          <input type="tel" id="suPhone" required placeholder="+91 9876543210" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-600 outline-none">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">WhatsApp Number</label>
+          <input type="tel" id="suPhone" required placeholder="+91 9876543210" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-600 focus:border-brand-600 text-base font-medium outline-none transition">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Email Address</label>
-          <input type="email" id="suEmail" required placeholder="rahul@example.com" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-600 outline-none">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email Address</label>
+          <input type="email" id="suEmail" required placeholder="rahul@example.com" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-600 focus:border-brand-600 text-base font-medium outline-none transition">
         </div>
 
-        <button type="submit" id="suSubmitBtn" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg transition shadow-md">
+        <button type="submit" id="suSubmitBtn" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-base rounded-xl transition shadow-lg shadow-brand-600/20">
           Complete Free Sign-Up
         </button>
       </form>
 
-      <div class="mt-4 pt-4 border-t text-center">
-        <button onclick="closeModal('signUpModal')" class="text-sm text-gray-500 hover:text-gray-800">
-          Continue without signing up
+      <div class="mt-5 pt-4 border-t border-slate-100 text-center">
+        <button onclick="closeModal('signUpModal')" class="text-sm font-semibold text-slate-500 hover:text-slate-800 transition">
+          Continue browsing without signing up
         </button>
       </div>
     </div>
   </div>
 
   <!-- APPLY MODAL -->
-  <div id="applyModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl relative text-center">
-      <button onclick="closeModal('applyModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+  <div id="applyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative text-center border border-slate-100">
+      <button onclick="closeModal('applyModal')" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
       
-      <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-full flex items-center justify-center mx-auto mb-3">
-        <i class="fa-solid fa-paper-plane text-xl"></i>
+      <div class="w-14 h-14 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+        <i class="fa-solid fa-paper-plane"></i>
       </div>
       
-      <h3 id="applyModalTitle" class="text-lg font-bold text-gray-900">Apply for Job</h3>
-      <p id="applyModalCompany" class="text-xs text-gray-500 mb-6"></p>
+      <h3 id="applyModalTitle" class="text-xl font-bold text-slate-900 leading-snug">Apply for Job</h3>
+      <p id="applyModalCompany" class="text-sm font-medium text-slate-500 mb-6 mt-1"></p>
 
       <div class="space-y-3">
-        <a id="directApplyBtn" href="#" target="_blank" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-lg flex items-center justify-center gap-2 transition">
+        <a id="directApplyBtn" href="#" target="_blank" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-base rounded-xl flex items-center justify-center gap-2.5 transition shadow-lg shadow-brand-600/20">
           <i class="fa-solid fa-arrow-up-right-from-square"></i> Apply Directly
         </a>
-        <a id="getHelpBtn" href="#" target="_blank" class="w-full py-3 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium rounded-lg flex items-center justify-center gap-2 border border-emerald-200 transition">
-          <i class="fa-brands fa-whatsapp text-lg"></i> Get Help
+        <a id="getHelpBtn" href="#" target="_blank" class="w-full py-3.5 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 font-bold text-base rounded-xl flex items-center justify-center gap-2.5 border border-emerald-200 transition">
+          <i class="fa-brands fa-whatsapp text-xl text-emerald-600"></i> Get Help on WhatsApp
         </a>
       </div>
     </div>
   </div>
 
   <!-- SAVED JOBS MODAL -->
-  <div id="savedJobsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-xl relative max-h-[85vh] flex flex-col">
-      <div class="flex items-center justify-between pb-4 border-b">
-        <h3 class="text-xl font-bold text-gray-900"><i class="fa-solid fa-bookmark text-brand-600 mr-2"></i>Saved Jobs</h3>
-        <button onclick="closeModal('savedJobsModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+  <div id="savedJobsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative max-h-[85vh] flex flex-col border border-slate-100">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 class="text-2xl font-bold text-slate-900 flex items-center gap-2.5">
+          <i class="fa-solid fa-bookmark text-brand-600"></i> Saved Jobs
+        </h3>
+        <button onclick="closeModal('savedJobsModal')" class="text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
       <div id="savedJobsList" class="overflow-y-auto py-4 space-y-3 flex-grow">
@@ -168,7 +277,7 @@
     </div>
   </div>
 
-  <!-- SCRIPT LOGIC -->
+  <!-- SCRIPT LOGIC (EXACT ORIGINAL LOGIC) -->
   <script>
     // Configuration
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzr2RTzuIxFPw5lIIge84IWTRveWKTf5OqCVlXL4_curFbWwpKs6slAlHgD7qDFABzv/exec"; 
@@ -234,51 +343,53 @@
         const isSaved = currentUser && currentUser.savedJobs && currentUser.savedJobs.includes(job.jobId);
         
         const card = document.createElement('div');
-        card.className = "bg-white border rounded-2xl p-5 shadow-sm hover:shadow-md transition relative flex flex-col justify-between";
+        card.className = "bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group";
 
         card.innerHTML = `
           <div>
             <!-- Top Tag Line -->
             <div class="flex items-center justify-between gap-2 mb-3">
-              <span class="text-xs font-semibold px-2.5 py-1 bg-brand-50 text-brand-700 rounded-md border border-brand-100">
+              <span class="text-xs font-bold px-3 py-1 bg-brand-50 text-brand-800 rounded-lg border border-brand-100/80 uppercase tracking-wider">
                 ${escapeHtml(job.jobCategory || 'General')}
               </span>
-              ${job.featured ? `<span class="text-xs font-semibold px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full flex items-center gap-1"><i class="fa-solid fa-star text-amber-500 text-[10px]"></i> Featured</span>` : ''}
+              ${job.featured ? `<span class="text-xs font-bold px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-full flex items-center gap-1"><i class="fa-solid fa-star text-amber-500"></i> Featured</span>` : ''}
             </div>
 
             <!-- Job Title & Company -->
-            <h3 class="text-lg font-bold text-gray-900 leading-snug">${escapeHtml(job.jobTitle)}</h3>
-            <p class="text-sm font-medium text-gray-600 mb-3">${escapeHtml(job.company)} ${job.companyCategory ? `<span class="text-gray-400 font-normal">(${escapeHtml(job.companyCategory)})</span>` : ''}</p>
+            <h3 class="text-xl font-bold text-slate-900 group-hover:text-brand-700 transition-colors leading-snug mb-1">${escapeHtml(job.jobTitle)}</h3>
+            <p class="text-base font-semibold text-slate-600 mb-4">${escapeHtml(job.company)} ${job.companyCategory ? `<span class="text-slate-400 font-normal text-sm">(${escapeHtml(job.companyCategory)})</span>` : ''}</p>
 
-            <!-- Meta info -->
-            <div class="space-y-1.5 text-xs text-gray-500 mb-4">
-              <div class="flex items-center gap-2"><i class="fa-solid fa-location-dot w-4 text-gray-400"></i> ${escapeHtml(job.location)}</div>
-              <div class="flex items-center gap-2"><i class="fa-solid fa-briefcase w-4 text-gray-400"></i> ${escapeHtml(job.jobType)}</div>
-              <div class="flex items-center gap-2"><i class="fa-solid fa-wallet w-4 text-gray-400"></i> ${escapeHtml(job.salary || 'Not Disclosed')}</div>
-              <div class="flex items-center gap-2"><i class="fa-solid fa-clock w-4 text-gray-400"></i> Posted: ${job.postedOn}</div>
+            <!-- Meta info Grid -->
+            <div class="space-y-2 text-sm font-medium text-slate-600 mb-5 bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+              <div class="flex items-center gap-2.5"><i class="fa-solid fa-location-dot w-4 text-slate-400"></i> ${escapeHtml(job.location)}</div>
+              <div class="flex items-center gap-2.5"><i class="fa-solid fa-briefcase w-4 text-slate-400"></i> ${escapeHtml(job.jobType)}</div>
+              <div class="flex items-center gap-2.5 text-slate-800 font-semibold"><i class="fa-solid fa-wallet w-4 text-brand-600"></i> ${escapeHtml(job.salary || 'Not Disclosed')}</div>
+              <div class="flex items-center gap-2.5 text-xs text-slate-400 pt-1 border-t border-slate-200/60"><i class="fa-solid fa-clock w-4"></i> Posted: ${job.postedOn}</div>
             </div>
 
             <!-- Description -->
-            <p class="text-xs text-gray-600 line-clamp-3 mb-6">${escapeHtml(job.description)}</p>
+            <p class="text-sm text-slate-600 line-clamp-3 mb-6 leading-relaxed">${escapeHtml(job.description)}</p>
           </div>
 
-          <!-- Card Actions Grid -->
-          <div class="pt-3 border-t grid grid-cols-4 gap-2">
-            <button onclick="openApplyModal('${job.jobId}')" class="col-span-2 py-2 px-3 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition text-center">
-              Apply
-            </button>
-            <button onclick="directHelp('${job.jobId}')" class="py-2 px-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold rounded-lg border border-emerald-200 transition text-center" title="Get Help on WhatsApp">
-              <i class="fa-brands fa-whatsapp text-sm"></i> Help
-            </button>
-            <button onclick="toggleSave('${job.jobId}')" class="py-2 px-2 ${isSaved ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-gray-50 text-gray-600 border-gray-200'} border text-xs font-semibold rounded-lg transition text-center flex items-center justify-center gap-1">
-              <i class="${isSaved ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i>
-            </button>
-          </div>
-          
-          <div class="mt-2 text-right">
-            <button onclick="shareJob('${job.jobId}')" class="text-[11px] text-gray-400 hover:text-gray-600 font-medium">
-              <i class="fa-solid fa-share-nodes"></i> Share Job
-            </button>
+          <div>
+            <!-- Card Actions Grid -->
+            <div class="pt-4 border-t border-slate-100 grid grid-cols-4 gap-2">
+              <button onclick="openApplyModal('${job.jobId}')" class="col-span-2 py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl transition text-center shadow-md shadow-brand-600/10">
+                Apply
+              </button>
+              <button onclick="directHelp('${job.jobId}')" class="py-3 px-2 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 text-xs font-bold rounded-xl border border-emerald-200 transition text-center flex items-center justify-center gap-1" title="Get Help on WhatsApp">
+                <i class="fa-brands fa-whatsapp text-base text-emerald-600"></i> Help
+              </button>
+              <button onclick="toggleSave('${job.jobId}')" class="py-3 px-2 ${isSaved ? 'bg-amber-50 text-amber-700 border-amber-300' : 'bg-slate-50 text-slate-600 border-slate-200'} border text-xs font-bold rounded-xl transition text-center flex items-center justify-center gap-1">
+                <i class="${isSaved ? 'fa-solid' : 'fa-regular'} fa-bookmark text-sm"></i>
+              </button>
+            </div>
+            
+            <div class="mt-3 text-right">
+              <button onclick="shareJob('${job.jobId}')" class="text-xs text-slate-400 hover:text-slate-600 font-semibold transition inline-flex items-center gap-1">
+                <i class="fa-solid fa-share-nodes"></i> Share Job
+              </button>
+            </div>
           </div>
         `;
 
@@ -391,8 +502,8 @@
       btn.disabled = true;
 
       const name = document.getElementById('suName').value;
-      // Remove any stray spaces or special characters except '+'
-const phone = document.getElementById('suPhone').value.replace(/[^\d+]/g, '');
+      const rawPhone = document.getElementById('suPhone').value;
+      const phone = rawPhone.replace(/[^\d+]/g, ''); // Clean leading non-digits
       const email = document.getElementById('suEmail').value;
 
       try {
@@ -424,21 +535,21 @@ const phone = document.getElementById('suPhone').value.replace(/[^\d+]/g, '');
         const count = currentUser.savedJobs ? currentUser.savedJobs.length : 0;
         authArea.innerHTML = `
           <div class="flex items-center gap-3">
-            <button onclick="openSavedJobsModal()" class="text-xs font-semibold px-3 py-1.5 bg-brand-50 text-brand-700 hover:bg-brand-100 rounded-lg border border-brand-200 transition flex items-center gap-1.5">
-              <i class="fa-solid fa-bookmark"></i> Saved (${count}/10)
+            <button onclick="openSavedJobsModal()" class="text-xs sm:text-sm font-bold px-3.5 py-2 bg-brand-50 text-brand-800 hover:bg-brand-100 rounded-xl border border-brand-200 transition flex items-center gap-2">
+              <i class="fa-solid fa-bookmark text-brand-600"></i> Saved <span class="bg-brand-200 text-brand-900 px-1.5 py-0.5 rounded-md text-[11px]">${count}/10</span>
             </button>
             <div class="text-right hidden sm:block">
-              <p class="text-xs font-bold text-gray-900">${escapeHtml(currentUser.name)}</p>
-              <p class="text-[10px] text-gray-500">${escapeHtml(currentUser.email)}</p>
+              <p class="text-sm font-bold text-slate-900 leading-tight">${escapeHtml(currentUser.name)}</p>
+              <p class="text-xs text-slate-500 font-medium">${escapeHtml(currentUser.email)}</p>
             </div>
-            <button onclick="signOut()" class="text-xs text-gray-400 hover:text-red-600 p-1" title="Sign Out">
-              <i class="fa-solid fa-right-from-bracket text-base"></i>
+            <button onclick="signOut()" class="text-slate-400 hover:text-red-600 p-2 text-base transition" title="Sign Out">
+              <i class="fa-solid fa-right-from-bracket"></i>
             </button>
           </div>
         `;
       } else {
         authArea.innerHTML = `
-          <button onclick="openModal('signUpModal')" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg shadow-sm transition">
+          <button onclick="openModal('signUpModal')" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl shadow-md shadow-brand-600/20 transition">
             Free Sign-Up
           </button>
         `;
@@ -451,7 +562,7 @@ const phone = document.getElementById('suPhone').value.replace(/[^\d+]/g, '');
       list.innerHTML = '';
 
       if (!currentUser || !currentUser.savedJobs || currentUser.savedJobs.length === 0) {
-        list.innerHTML = `<p class="text-sm text-gray-500 text-center py-6">You haven't saved any jobs yet.</p>`;
+        list.innerHTML = `<p class="text-base text-slate-500 font-medium text-center py-8">You haven't saved any jobs yet.</p>`;
         openModal('savedJobsModal');
         return;
       }
@@ -459,27 +570,26 @@ const phone = document.getElementById('suPhone').value.replace(/[^\d+]/g, '');
       currentUser.savedJobs.forEach(savedId => {
         const activeJob = allJobs.find(j => j.jobId === savedId);
         const item = document.createElement('div');
-        item.className = "p-3 border rounded-xl flex items-center justify-between gap-3 bg-gray-50";
+        item.className = "p-4 border border-slate-200 rounded-2xl flex items-center justify-between gap-3 bg-slate-50";
 
         if (activeJob) {
           item.innerHTML = `
             <div>
-              <h4 class="text-sm font-bold text-gray-900">${escapeHtml(activeJob.jobTitle)}</h4>
-              <p class="text-xs text-gray-500">${escapeHtml(activeJob.company)} • ${escapeHtml(activeJob.location)}</p>
+              <h4 class="text-base font-bold text-slate-900">${escapeHtml(activeJob.jobTitle)}</h4>
+              <p class="text-xs font-semibold text-slate-500">${escapeHtml(activeJob.company)} • ${escapeHtml(activeJob.location)}</p>
             </div>
             <div class="flex items-center gap-2">
-              <button onclick="openApplyModal('${activeJob.jobId}')" class="px-3 py-1 bg-brand-600 text-white text-xs font-semibold rounded-md">Apply</button>
-              <button onclick="toggleSave('${activeJob.jobId}')" class="text-gray-400 hover:text-red-600 p-1"><i class="fa-solid fa-trash-can text-sm"></i></button>
+              <button onclick="openApplyModal('${activeJob.jobId}')" class="px-3.5 py-1.5 bg-brand-600 text-white text-xs font-bold rounded-lg shadow-sm">Apply</button>
+              <button onclick="toggleSave('${activeJob.jobId}')" class="text-slate-400 hover:text-red-600 p-1.5 text-base" title="Remove"><i class="fa-solid fa-trash-can"></i></button>
             </div>
           `;
         } else {
-          // Expired or deleted job handling
           item.innerHTML = `
             <div>
-              <h4 class="text-sm font-bold text-gray-400 line-through">Job ID: ${savedId}</h4>
+              <h4 class="text-sm font-bold text-slate-400 line-through">Job ID: ${savedId}</h4>
               <p class="text-xs text-red-500 font-medium">This job has expired or was removed from our database.</p>
             </div>
-            <button onclick="toggleSave('${savedId}')" class="text-gray-400 hover:text-red-600 p-1" title="Remove"><i class="fa-solid fa-trash-can text-sm"></i></button>
+            <button onclick="toggleSave('${savedId}')" class="text-slate-400 hover:text-red-600 p-1.5 text-base" title="Remove"><i class="fa-solid fa-trash-can"></i></button>
           `;
         }
         list.appendChild(item);
