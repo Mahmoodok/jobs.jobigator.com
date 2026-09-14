@@ -391,7 +391,8 @@
       btn.disabled = true;
 
       const name = document.getElementById('suName').value;
-      const phone = document.getElementById('suPhone').value;
+      // Remove any stray spaces or special characters except '+'
+const phone = document.getElementById('suPhone').value.replace(/[^\d+]/g, '');
       const email = document.getElementById('suEmail').value;
 
       try {
