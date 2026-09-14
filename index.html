@@ -54,7 +54,10 @@
         <div class="flex flex-col">
           <div class="flex items-center gap-1.5">
             <span class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">Jobs</span>
-            <span class="text-xs font-bold px-2 py-0.5 bg-brand-100 text-brand-800 rounded-full">by Jobigator</span>
+            <a href="https://jobigator.com/" class="inline-block">
+  <span class="text-xs font-bold px-2 py-0.5 bg-brand-100 text-brand-800 rounded-full">by Jobigator</span>
+</a>
+
           </div>
           <span class="text-xs font-medium text-slate-500 tracking-wide mt-1">Verify • Apply • Grow</span>
         </div>
@@ -82,7 +85,7 @@
       </div>
 
       <!-- Search Box Container -->
-      <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200/80 space-y-4 max-w-5xl mx-auto">
+      <div id="searchSection" class="bg-white p-4 sm:p-6 rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200/80 space-y-4 max-w-5xl mx-auto">
         
         <!-- Search Input Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -101,22 +104,31 @@
         </div>
 
         <!-- Dropdown Filters Bar -->
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-slate-100">
-          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-            <select id="filterType" class="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-brand-600 outline-none cursor-pointer transition">
-              <option value="">All Job Types</option>
-              <option value="Full Time">Full Time</option>
-              <option value="Part Time">Part Time</option>
-              <option value="Contract">Contract</option>
-              <option value="Remote">Remote</option>
-              <option value="Internship">Internship</option>
-            </select>
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-slate-100">
+  <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+    <select id="filterType" class="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-brand-600 outline-none cursor-pointer transition">
+      <option value="">All Job Types</option>
+      <option value="Full Time">Full Time</option>
+      <option value="Part Time">Part Time</option>
+      <option value="Contract">Contract</option>
+      <option value="Remote">Remote</option>
+      <option value="Internship">Internship</option>
+    </select>
 
-            <select id="filterSalary" class="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-brand-600 outline-none cursor-pointer transition">
-              <option value="">All Salary Ranges</option>
-              <option value="Disclosed">Salary Mentioned</option>
-            </select>
-          </div>
+    <select id="filterSalary" class="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-brand-600 outline-none cursor-pointer transition">
+      <option value="">All Salary Ranges</option>
+      <option value="Disclosed">Salary Mentioned</option>
+    </select>
+
+    <!-- Experience Filter Dropdown -->
+    <select id="filterExperience" class="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-brand-600 outline-none cursor-pointer transition">
+      <option value="">All Experience Levels</option>
+      <option value="Fresher">Fresher Only</option>
+      <option value="Experienced">Experienced Only</option>
+    </select>
+    
+  </div>
+</div>
 
           <button onclick="resetFilters()" class="text-sm text-brand-700 hover:text-brand-900 font-bold flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg hover:bg-brand-50 transition">
             <i class="fa-solid fa-rotate-left"></i> Clear Filters
@@ -624,5 +636,22 @@
       });
     }
   </script>
+
+  <!-- Floating Search & Filter Badge -->
+<button onclick="scrollToSearch()" class="fixed bottom-6 right-6 md:right-8 z-50 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs md:text-sm px-4 py-2.5 rounded-full shadow-xl shadow-brand-900/20 border border-brand-500/30 flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 cursor-pointer">
+  <i class="fa-solid fa-magnifying-glass text-xs"></i>
+  <span>Search & Filter</span>
+  <i class="fa-solid fa-arrow-up text-xs text-brand-200"></i>
+</button>
+
+<script>
+  function scrollToSearch() {
+    const searchSection = document.getElementById('searchSection');
+    if (searchSection) {
+      searchSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+</script>
+  
 </body>
 </html>
