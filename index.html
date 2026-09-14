@@ -59,7 +59,7 @@
 </a>
 
           </div>
-          <span class="text-xs font-medium text-slate-500 tracking-wide mt-1">Verify • Apply • Grow</span>
+          <span class="text-xs font-medium text-slate-500 tracking-wide mt-1">Find • Get Help • Apply</span>
         </div>
       </a>
 
@@ -289,156 +289,197 @@
     </div>
   </div>
 
-  <!-- SCRIPT LOGIC (EXACT ORIGINAL LOGIC) -->
-  <script>
-    // Configuration
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzr2RTzuIxFPw5lIIge84IWTRveWKTf5OqCVlXL4_curFbWwpKs6slAlHgD7qDFABzv/exec"; 
-    const WHATSAPP_NUMBER = "917013681638";
+  <!-- SCRIPT LOGIC -->
+<script>
+  // Configuration
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzr2RTzuIxFPw5lIIge84IWTRveWKTf5OqCVlXL4_curFbWwpKs6slAlHgD7qDFABzv/exec"; 
+  const WHATSAPP_NUMBER = "917013681638";
 
-    // State Variables
-    let allJobs = [];
-    let currentUser = JSON.parse(localStorage.getItem('jobigator_user')) || null;
-    let currentApplyingJob = null;
+  // State Variables
+  let allJobs = [];
+  let currentUser = JSON.parse(localStorage.getItem('jobigator_user')) || null;
+  let currentApplyingJob = null;
 
-    // Initial Load
-    document.addEventListener("DOMContentLoaded", () => {
-      renderAuthArea();
-      fetchJobs();
+  // Initial Load
+  document.addEventListener("DOMContentLoaded", () => {
+    renderAuthArea();
+    fetchJobs();
 
-      // Show Sign Up Modal on first visit if user is not signed in
-      if (!currentUser && !localStorage.getItem('jobigator_dismissed_signup')) {
-        setTimeout(() => { openModal('signUpModal'); }, 1200);
+    // Show Sign Up Modal on first visit if user is not signed in
+    if (!currentUser && !localStorage.getItem('jobigator_dismissed_signup')) {
+      setTimeout(() => { openModal('signUpModal'); }, 1200);
+    }
+
+    // Event Listeners for Filters
+    document.getElementById('searchRole')?.addEventListener('input', filterJobs);
+    document.getElementById('searchCompany')?.addEventListener('input', filterJobs);
+    document.getElementById('searchLocation')?.addEventListener('input', filterJobs);
+    document.getElementById('filterType')?.addEventListener('change', filterJobs);
+    document.getElementById('filterSalary')?.addEventListener('change', filterJobs);
+    document.getElementById('filterExperience')?.addEventListener('change', filterJobs);
+  });
+
+  // Fetch Jobs from Apps Script
+  async function fetchJobs() {
+    try {
+      const response = await fetch(`${APPS_SCRIPT_URL}?action=getJobs`);
+      const data = await response.json();
+
+      if (data.status === "success") {
+        allJobs = data.jobs;
+        renderJobs(allJobs);
+      }
+    } catch (err) {
+      console.error("Error fetching jobs:", err);
+    } finally {
+      const loader = document.getElementById('loader');
+      if (loader) loader.classList.add('hidden');
+    }
+  }
+
+  // Render Cards Grid
+  function renderJobs(jobs) {
+    const grid = document.getElementById('jobGrid');
+    const noResults = document.getElementById('noResults');
+
+    if (!grid || !noResults) return;
+
+    grid.innerHTML = '';
+
+    if (jobs.length === 0) {
+      grid.classList.add('hidden');
+      noResults.classList.remove('hidden');
+      return;
+    }
+
+    noResults.classList.add('hidden');
+    grid.classList.remove('hidden');
+
+    jobs.forEach(job => {
+      const isSaved = currentUser && currentUser.savedJobs && currentUser.savedJobs.includes(job.jobId);
+      
+      const card = document.createElement('div');
+      card.className = "bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group";
+
+      card.innerHTML = `
+        <div>
+          <!-- Top Tag Line -->
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <span class="text-xs font-bold px-3 py-1 bg-brand-50 text-brand-800 rounded-lg border border-brand-100/80 uppercase tracking-wider">
+              ${escapeHtml(job.jobCategory || 'General')}
+            </span>
+            ${job.featured ? `<span class="text-xs font-bold px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-full flex items-center gap-1"><i class="fa-solid fa-star text-amber-500"></i> Featured</span>` : ''}
+          </div>
+
+          <!-- Job Title & Company -->
+          <h3 class="text-xl font-bold text-slate-900 group-hover:text-brand-700 transition-colors leading-snug mb-1">${escapeHtml(job.jobTitle)}</h3>
+          <p class="text-base font-semibold text-slate-600 mb-4">${escapeHtml(job.company)} ${job.companyCategory ? `<span class="text-slate-400 font-normal text-sm">(${escapeHtml(job.companyCategory)})</span>` : ''}</p>
+
+          <!-- Meta info Grid -->
+          <div class="space-y-2 text-sm font-medium text-slate-600 mb-5 bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+            <div class="flex items-center gap-2.5"><i class="fa-solid fa-location-dot w-4 text-slate-400"></i> ${escapeHtml(job.location)}</div>
+            <div class="flex items-center gap-2.5"><i class="fa-solid fa-briefcase w-4 text-slate-400"></i> ${escapeHtml(job.jobType)}</div>
+            <div class="flex items-center justify-between gap-2 text-slate-800 font-semibold pt-1 border-t border-slate-200/50">
+              <span class="flex items-center gap-2.5"><i class="fa-solid fa-wallet w-4 text-brand-600"></i> ${escapeHtml(job.salary || 'Not Disclosed')}</span>
+              ${job.experience ? `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200/60">
+                  <i class="fa-solid fa-user-check text-emerald-500"></i> ${escapeHtml(job.experience)}
+                </span>
+              ` : ''}
+            </div>
+            <div class="flex items-center gap-2.5 text-xs text-slate-400 pt-1 border-t border-slate-200/60"><i class="fa-solid fa-clock w-4"></i> Posted: ${escapeHtml(job.postedOn || '')}</div>
+          </div>
+
+          <!-- Description -->
+          <p class="text-sm text-slate-600 line-clamp-3 mb-6 leading-relaxed">${escapeHtml(job.description)}</p>
+        </div>
+
+        <div>
+          <!-- Card Actions Grid -->
+          <div class="pt-4 border-t border-slate-100 grid grid-cols-4 gap-2">
+            <button onclick="openApplyModal('${job.jobId}')" class="col-span-2 py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl transition text-center shadow-md shadow-brand-600/10">
+              Apply
+            </button>
+            <button onclick="directHelp('${job.jobId}')" class="py-3 px-2 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 text-xs font-bold rounded-xl border border-emerald-200 transition text-center flex items-center justify-center gap-1" title="Get Help on WhatsApp">
+              <i class="fa-brands fa-whatsapp text-base text-emerald-600"></i> Help
+            </button>
+            <button onclick="toggleSave('${job.jobId}')" class="py-3 px-2 ${isSaved ? 'bg-amber-50 text-amber-700 border-amber-300' : 'bg-slate-50 text-slate-600 border-slate-200'} border text-xs font-bold rounded-xl transition text-center flex items-center justify-center gap-1">
+              <i class="${isSaved ? 'fa-solid' : 'fa-regular'} fa-bookmark text-sm"></i>
+            </button>
+          </div>
+          
+          <div class="mt-3 text-right">
+            <button onclick="shareJob('${job.jobId}')" class="text-xs text-slate-400 hover:text-slate-600 font-semibold transition inline-flex items-center gap-1">
+              <i class="fa-solid fa-share-nodes"></i> Share Job
+            </button>
+          </div>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+  }
+
+  // Filter Logic
+  function filterJobs() {
+    const role = (document.getElementById('searchRole')?.value || '').toLowerCase();
+    const company = (document.getElementById('searchCompany')?.value || '').toLowerCase();
+    const location = (document.getElementById('searchLocation')?.value || '').toLowerCase();
+    const type = document.getElementById('filterType')?.value || '';
+    const salary = document.getElementById('filterSalary')?.value || '';
+    const exp = (document.getElementById('filterExperience')?.value || '').toLowerCase();
+
+    const filtered = allJobs.filter(j => {
+      const matchRole = (j.jobTitle || '').toLowerCase().includes(role) || (j.jobCategory || '').toLowerCase().includes(role);
+      const matchCompany = (j.company || '').toLowerCase().includes(company);
+      const matchLoc = (j.location || '').toLowerCase().includes(location);
+      const matchType = type === "" || (j.jobType || '').toLowerCase() === type.toLowerCase();
+      const matchSalary = salary === "" || (j.salary && j.salary.toLowerCase() !== "not disclosed");
+
+      // Experience Filter Logic
+      let matchExp = true;
+      if (exp !== "") {
+        const jobExp = (j.experience || "").toLowerCase().trim();
+        
+        // Blank or combined tags (e.g. Fresher/Experienced) match all selections
+        const isFlexible = !jobExp || (jobExp.includes("fresher") && jobExp.includes("experienced"));
+
+        if (!isFlexible) {
+          if (exp === "fresher") {
+            matchExp = jobExp.includes("fresher");
+          } else if (exp === "experienced") {
+            matchExp = jobExp.includes("experienced");
+          }
+        }
       }
 
-      // Event Listeners for Filters
-      document.getElementById('searchRole').addEventListener('input', filterJobs);
-      document.getElementById('searchCompany').addEventListener('input', filterJobs);
-      document.getElementById('searchLocation').addEventListener('input', filterJobs);
-      document.getElementById('filterType').addEventListener('change', filterJobs);
-      document.getElementById('filterSalary').addEventListener('change', filterJobs);
+      return matchRole && matchCompany && matchLoc && matchType && matchSalary && matchExp;
     });
 
-    // Fetch Jobs from Apps Script
-    async function fetchJobs() {
-      try {
-        const response = await fetch(`${APPS_SCRIPT_URL}?action=getJobs`);
-        const data = await response.json();
+    renderJobs(filtered);
+  }
 
-        if (data.status === "success") {
-          allJobs = data.jobs;
-          renderJobs(allJobs);
-        }
-      } catch (err) {
-        console.error("Error fetching jobs:", err);
-      } finally {
-        document.getElementById('loader').classList.add('hidden');
-      }
-    }
+  function resetFilters() {
+    if (document.getElementById('searchRole')) document.getElementById('searchRole').value = '';
+    if (document.getElementById('searchCompany')) document.getElementById('searchCompany').value = '';
+    if (document.getElementById('searchLocation')) document.getElementById('searchLocation').value = '';
+    if (document.getElementById('filterType')) document.getElementById('filterType').value = '';
+    if (document.getElementById('filterSalary')) document.getElementById('filterSalary').value = '';
+    if (document.getElementById('filterExperience')) document.getElementById('filterExperience').value = '';
+    renderJobs(allJobs);
+  }
 
-    // Render Cards Grid
-    function renderJobs(jobs) {
-      const grid = document.getElementById('jobGrid');
-      const noResults = document.getElementById('noResults');
-
-      grid.innerHTML = '';
-
-      if (jobs.length === 0) {
-        grid.classList.add('hidden');
-        noResults.classList.remove('hidden');
-        return;
-      }
-
-      noResults.classList.add('hidden');
-      grid.classList.remove('hidden');
-
-      jobs.forEach(job => {
-        const isSaved = currentUser && currentUser.savedJobs && currentUser.savedJobs.includes(job.jobId);
-        
-        const card = document.createElement('div');
-        card.className = "bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group";
-
-        card.innerHTML = `
-          <div>
-            <!-- Top Tag Line -->
-            <div class="flex items-center justify-between gap-2 mb-3">
-              <span class="text-xs font-bold px-3 py-1 bg-brand-50 text-brand-800 rounded-lg border border-brand-100/80 uppercase tracking-wider">
-                ${escapeHtml(job.jobCategory || 'General')}
-              </span>
-              ${job.featured ? `<span class="text-xs font-bold px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-full flex items-center gap-1"><i class="fa-solid fa-star text-amber-500"></i> Featured</span>` : ''}
-            </div>
-
-            <!-- Job Title & Company -->
-            <h3 class="text-xl font-bold text-slate-900 group-hover:text-brand-700 transition-colors leading-snug mb-1">${escapeHtml(job.jobTitle)}</h3>
-            <p class="text-base font-semibold text-slate-600 mb-4">${escapeHtml(job.company)} ${job.companyCategory ? `<span class="text-slate-400 font-normal text-sm">(${escapeHtml(job.companyCategory)})</span>` : ''}</p>
-
-            <!-- Meta info Grid -->
-            <div class="space-y-2 text-sm font-medium text-slate-600 mb-5 bg-slate-50 p-3.5 rounded-xl border border-slate-100">
-              <div class="flex items-center gap-2.5"><i class="fa-solid fa-location-dot w-4 text-slate-400"></i> ${escapeHtml(job.location)}</div>
-              <div class="flex items-center gap-2.5"><i class="fa-solid fa-briefcase w-4 text-slate-400"></i> ${escapeHtml(job.jobType)}</div>
-              <div class="flex items-center gap-2.5 text-slate-800 font-semibold"><i class="fa-solid fa-wallet w-4 text-brand-600"></i> ${escapeHtml(job.salary || 'Not Disclosed')}</div>
-              <div class="flex items-center gap-2.5 text-xs text-slate-400 pt-1 border-t border-slate-200/60"><i class="fa-solid fa-clock w-4"></i> Posted: ${job.postedOn}</div>
-            </div>
-
-            <!-- Description -->
-            <p class="text-sm text-slate-600 line-clamp-3 mb-6 leading-relaxed">${escapeHtml(job.description)}</p>
-          </div>
-
-          <div>
-            <!-- Card Actions Grid -->
-            <div class="pt-4 border-t border-slate-100 grid grid-cols-4 gap-2">
-              <button onclick="openApplyModal('${job.jobId}')" class="col-span-2 py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl transition text-center shadow-md shadow-brand-600/10">
-                Apply
-              </button>
-              <button onclick="directHelp('${job.jobId}')" class="py-3 px-2 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 text-xs font-bold rounded-xl border border-emerald-200 transition text-center flex items-center justify-center gap-1" title="Get Help on WhatsApp">
-                <i class="fa-brands fa-whatsapp text-base text-emerald-600"></i> Help
-              </button>
-              <button onclick="toggleSave('${job.jobId}')" class="py-3 px-2 ${isSaved ? 'bg-amber-50 text-amber-700 border-amber-300' : 'bg-slate-50 text-slate-600 border-slate-200'} border text-xs font-bold rounded-xl transition text-center flex items-center justify-center gap-1">
-                <i class="${isSaved ? 'fa-solid' : 'fa-regular'} fa-bookmark text-sm"></i>
-              </button>
-            </div>
-            
-            <div class="mt-3 text-right">
-              <button onclick="shareJob('${job.jobId}')" class="text-xs text-slate-400 hover:text-slate-600 font-semibold transition inline-flex items-center gap-1">
-                <i class="fa-solid fa-share-nodes"></i> Share Job
-              </button>
-            </div>
-          </div>
-        `;
-
-        grid.appendChild(card);
-      });
-    }
-
-    // Filter Logic
-    function filterJobs() {
-      const role = document.getElementById('searchRole').value.toLowerCase();
-      const company = document.getElementById('searchCompany').value.toLowerCase();
-      const location = document.getElementById('searchLocation').value.toLowerCase();
-      const type = document.getElementById('filterType').value;
-      const salary = document.getElementById('filterSalary').value;
-
-      const filtered = allJobs.filter(j => {
-        const matchRole = j.jobTitle.toLowerCase().includes(role) || j.jobCategory.toLowerCase().includes(role);
-        const matchCompany = j.company.toLowerCase().includes(company);
-        const matchLoc = j.location.toLowerCase().includes(location);
-        const matchType = type === "" || j.jobType.toLowerCase() === type.toLowerCase();
-        const matchSalary = salary === "" || (j.salary && j.salary.toLowerCase() !== "not disclosed");
-
-        return matchRole && matchCompany && matchLoc && matchType && matchSalary;
-      });
-
-      renderJobs(filtered);
-    }
-
-    function resetFilters() {
-      document.getElementById('searchRole').value = '';
-      document.getElementById('searchCompany').value = '';
-      document.getElementById('searchLocation').value = '';
-      document.getElementById('filterType').value = '';
-      document.getElementById('filterSalary').value = '';
-      renderJobs(allJobs);
-    }
-
+  // Helper function to escape HTML special characters
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+  
     // Apply Modal Handlers
     function openApplyModal(jobId) {
       const job = allJobs.find(j => j.jobId === jobId);
