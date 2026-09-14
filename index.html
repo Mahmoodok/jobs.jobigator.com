@@ -349,22 +349,46 @@
   });
 
   // Fetch Jobs from Apps Script
-  async function fetchJobs() {
-    try {
-      const response = await fetch(`${APPS_SCRIPT_URL}?action=getJobs`);
-      const data = await response.json();
+async function fetchJobs() {
+  try {
+    const response = await fetch(`${APPS_SCRIPT_URL}?action=getJobs`);
+    const data = await response.json();
 
-      if (data.status === "success") {
-        allJobs = data.jobs;
+    if (data.status === "success") {
+      allJobs = data.jobs;
+
+      // Check if URL has a specific jobId parameter (e.g. ?jobId=JOB-102)
+      const urlParams = new URLSearchParams(window.location.search);
+      const sharedJobId = urlParams.get('jobId');
+
+      if (sharedJobId) {
+        const specificJob = allJobs.filter(j => String(j.jobId) === String(sharedJobId));
+        if (specificJob.length > 0) {
+          renderJobs(specificJob); // Show only the shared job
+          showDirectJobBanner();   // Optional banner offering to show all jobs
+        } else {
+          renderJobs(allJobs);     // Fallback if the job ID wasn't found or expired
+        }
+      } else {
         renderJobs(allJobs);
       }
-    } catch (err) {
-      console.error("Error fetching jobs:", err);
-    } finally {
-      const loader = document.getElementById('loader');
-      if (loader) loader.classList.add('hidden');
     }
+  } catch (err) {
+    console.error("Error fetching jobs:", err);
+  } finally {
+    const loader = document.getElementById('loader');
+    if (loader) loader.classList.add('hidden');
   }
+}
+
+// Helper to show a "Viewing single job" alert with a reset button
+function showDirectJobBanner() {
+  const noResults = document.getElementById('noResults');
+  if (!noResults) return;
+  
+  // Optional: You can display a small banner at the top notifying the user
+  console.log("Viewing shared job directly via URL link.");
+}
 
   // Render Cards Grid
   function renderJobs(jobs) {
@@ -560,21 +584,32 @@
       }
     }
 
-    // Share Handler
     function shareJob(jobId) {
-      const job = allJobs.find(j => j.jobId === jobId);
-      if (!job) return;
+  // Finds the job details from your allJobs array
+  const job = allJobs.find(j => j.jobId === jobId);
+  if (!job) return;
 
-      const portalUrl = window.location.href;
-      const text = `Check out this opening for ${job.jobTitle} at ${job.company}: ${portalUrl}`;
+  // Constructs a deep link pointing directly to this job ID
+  const baseUrl = window.location.origin + window.location.pathname;
+  const shareUrl = `${baseUrl}?jobId=${encodeURIComponent(jobId)}`;
 
-      const choice = confirm("Click OK to share on WhatsApp, or Cancel to share on LinkedIn.");
-      if (choice) {
-        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-      } else {
-        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(portalUrl)}`, '_blank');
-      }
-    }
+  const shareText = `Check out this job posting for ${job.jobTitle} at ${job.company}:\n${shareUrl}`;
+
+  if (navigator.share) {
+    navigator.share({
+      title: `${job.jobTitle} - ${job.company}`,
+      text: `Check out this job posting for ${job.jobTitle} at ${job.company}:`,
+      url: shareUrl
+    }).catch(err => console.log("Sharing cancelled or failed:", err));
+  } else {
+    // Fallback: Copy to clipboard if Web Share API is not supported
+    navigator.clipboard.writeText(shareText).then(() => {
+      alert("Job link copied to clipboard!");
+    }).catch(() => {
+      prompt("Copy this job link:", shareUrl);
+    });
+  }
+}
 
     // Sign Up Handler
     async function handleSignUpSubmit(e) {
