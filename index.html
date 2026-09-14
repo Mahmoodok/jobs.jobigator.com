@@ -253,7 +253,7 @@
       </div>
 
       <h2 class="text-2xl font-black text-slate-900 mb-1">Free Sign Up/Sign In</h2>
-      <p class="text-sm text-slate-500 font-medium mb-6">Sign up once to save favorite jobs and manage your applications. If you have already registered, simply enter the details and click the button.</p>
+      <p class="text-sm text-slate-500 font-medium mb-6">Sign up once to save favorite jobs and apply later. If you have already registered, simply enter the details and click the button.</p>
 
       <form id="signUpForm" onsubmit="handleSignUpSubmit(event)" class="space-y-4">
         <div>
@@ -739,12 +739,29 @@ function showDirectJobBanner() {
     }
   </script>
 
-  <!-- Floating Search & Filter Badge -->
-<button onclick="scrollToSearch()" class="fixed bottom-6 right-6 md:right-8 z-50 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs md:text-sm px-4 py-2.5 rounded-full shadow-xl shadow-brand-900/20 border border-brand-500/30 flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 cursor-pointer">
-  <i class="fa-solid fa-magnifying-glass text-xs"></i>
-  <span>Search & Filter</span>
-  <i class="fa-solid fa-arrow-up text-xs text-brand-200"></i>
-</button>
+ <!-- Floating Action Buttons Container -->
+<div class="fixed bottom-6 right-6 md:right-8 z-50 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 flex flex-col gap-3 items-center md:items-end">
+  
+  
+<!-- WhatsApp Get Help Button -->
+<a href="https://wa.me/917013681638?text=Hello%20Jobigator.%20I%20just%20visited%20your%20job%20portal.%0A%0AI%20am%20looking%20for%20some%20help%20with%20applying%20for%20jobs."
+   target="_blank"
+   rel="noopener noreferrer"
+   class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold text-xs md:text-sm px-4 py-2.5 rounded-full shadow-xl shadow-emerald-950/10 border border-emerald-200 flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 cursor-pointer no-underline">
+  <i class="fa-brands fa-whatsapp text-sm md:text-base text-emerald-600"></i>
+  <span>Get Help</span>
+</a>
+
+
+
+  <!-- Existing Search & Filter Badge -->
+  <button onclick="scrollToSearch()" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs md:text-sm px-4 py-2.5 rounded-full shadow-xl shadow-brand-900/20 border border-brand-500/30 flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 cursor-pointer">
+    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+    <span>Search & Filter</span>
+    <i class="fa-solid fa-arrow-up text-xs text-brand-200"></i>
+  </button>
+
+</div>
 
 <script>
   function scrollToSearch() {
@@ -754,6 +771,7 @@ function showDirectJobBanner() {
     }
   }
 </script>
+
   
 </body>
 </html>
