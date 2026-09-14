@@ -66,33 +66,34 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
 
-  <!-- TOP NAVBAR -->
-  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm transition-all">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+  <!-- TOP NAVBAR --> 
+<header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm transition-all"> 
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4"> 
+    
+    <!-- Site Logo / Branding --> 
+    <a href="https://jobs.jobigator.com" class="flex items-center gap-3 group"> 
       
-      <!-- Site Logo / Branding -->
-      <a href="https://jobs.jobigator.com" class="flex items-center gap-3 group">
-        <div class="w-11 h-11 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center text-white shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform">
-          <i class="fa-solid fa-briefcase text-xl"></i>
-        </div>
-        <div class="flex flex-col">
-          <div class="flex items-center gap-1.5">
-            <span class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">Jobs</span>
-            <a href="https://jobigator.com">
-  <span class="text-xs font-bold px-2 py-0.5 bg-brand-100 text-brand-800 rounded-full">by Jobigator</span>
-</a>
-
-          </div>
-          <span class="text-xs font-medium text-slate-500 tracking-wide mt-1">Find • Get Help • Apply</span>
-        </div>
-      </a>
-
-      <!-- User Profile / Auth Area -->
-      <div id="authArea">
-        <!-- JS injects Profile or Sign In Button -->
-      </div>
-    </div>
-  </header>
+      <!-- New Image Logo Container (Replacing the green shape & icon) -->
+      <div class="w-11 h-11 flex items-center justify-center group-hover:scale-105 transition-transform overflow-hidden rounded-xl">
+        <img src="logo.png" alt="Jobs by Jobigator Logo" class="w-full h-full object-contain" />
+      </div> 
+      
+      <div class="flex flex-col"> 
+        <div class="flex items-center gap-1.5"> 
+          <span class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">Jobs</span> 
+          <a href="https://jobigator.com"> 
+            <span class="text-xs font-bold px-2 py-0.5 bg-brand-100 text-brand-800 rounded-full">by Jobigator</span> 
+          </a> 
+        </div> 
+        <span class="text-xs font-medium text-slate-500 tracking-wide mt-1">Find • Get Help • Apply</span> </div> 
+    </a> 
+    
+    <!-- User Profile / Auth Area --> 
+    <div id="authArea"> 
+      <!-- JS injects Profile or Sign In Button --> 
+    </div> 
+  </div> 
+</header>
 
   <!-- HERO & SEARCH SECTION -->
   <section id="searchSection" class="bg-gradient-to-b from-brand-50/70 via-emerald-50/30 to-slate-50 py-10 sm:py-14 border-b border-slate-200">
@@ -191,49 +192,52 @@
   </main>
 
   <!-- FOOTER -->
-  <footer class="bg-slate-900 text-slate-300 border-t border-slate-800 mt-auto">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
-        
-        <!-- Column 1: Brand -->
-        <div class="space-y-4 md:col-span-2">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
-              <i class="fa-solid fa-briefcase"></i>
-            </div>
-            <span class="text-2xl font-black text-white tracking-tight">Jobs <span class="text-brand-500 font-bold text-sm">by Jobigator</span></span>
+<footer class="bg-slate-900 text-slate-300 border-t border-slate-800 mt-auto">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+      
+      <!-- Column 1: Brand -->
+      <div class="space-y-4 md:col-span-2">
+        <div class="flex items-center gap-3">
+          
+          <!-- New Image Logo Container (Replacing the green shape & icon) -->
+          <div class="w-10 h-10 flex items-center justify-center overflow-hidden rounded-xl">
+            <img src="logo.png" alt="Jobigator Logo" class="w-full h-full object-contain" />
           </div>
-          <p class="text-slate-400 text-sm leading-relaxed max-w-sm">
-            Jobigator connects active candidates with vetted job opportunities. Get direct application links or 1-on-1 assistance right on WhatsApp.
-          </p>
+          
+          <span class="text-2xl font-black text-white tracking-tight">Jobs <span class="text-brand-500 font-bold text-sm">by Jobigator</span></span>
         </div>
-
-        <!-- Column 2: Quick Links -->
-        <div>
-          <h4 class="text-white text-base font-bold mb-4">Quick Links</h4>
-          <ul class="space-y-2.5 text-sm font-medium">
-            <li><a href="#" onclick="resetFilters()" class="hover:text-brand-400 transition">Browse All Jobs</a></li>
-            <li><a href="#" onclick="openModal('signUpModal')" class="hover:text-brand-400 transition">Free Candidate Sign Up</a></li>
-            <li><a href="https://wa.me/917013681638" target="_blank" class="hover:text-brand-400 transition">Contact Support</a></li>
-          </ul>
-        </div>
-
-        <!-- Column 3: Contact & Help -->
-        <div>
-          <h4 class="text-white text-base font-bold mb-4">Get Assistance</h4>
-          <p class="text-slate-400 text-sm mb-3">Need help applying or finding specific roles?</p>
-          <a href="https://wa.me/917013681638" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition">
-            <i class="fa-brands fa-whatsapp text-lg"></i> Chat on WhatsApp
-          </a>
-        </div>
+        <p class="text-slate-400 text-sm leading-relaxed max-w-sm">
+          Jobigator connects active candidates with vetted job opportunities. Get direct application links or 1-on-1 assistance right on WhatsApp.
+        </p>
       </div>
 
-      <div class="pt-8 border-t border-slate-800 text-center sm:flex sm:items-center sm:justify-between text-xs text-slate-500">
-        <p>© 2026 Jobigator.com. All rights reserved.</p>
-        <p class="mt-2 sm:mt-0">Powered by Google Apps Script & GitHub Pages</p>
+      <!-- Column 2: Quick Links -->
+      <div>
+        <h4 class="text-white text-base font-bold mb-4">Quick Links</h4>
+        <ul class="space-y-2.5 text-sm font-medium">
+          <li><a href="#" onclick="resetFilters()" class="hover:text-brand-400 transition">Browse All Jobs</a></li>
+          <li><a href="#" onclick="openModal('signUpModal')" class="hover:text-brand-400 transition">Free Candidate Sign Up</a></li>
+          <li><a href="https://wa.me/917013681638" target="_blank" class="hover:text-brand-400 transition">Contact Support</a></li>
+        </ul>
+      </div>
+
+      <!-- Column 3: Contact & Help -->
+      <div>
+        <h4 class="text-white text-base font-bold mb-4">Get Assistance</h4>
+        <p class="text-slate-400 text-sm mb-3">Need help applying or finding specific roles?</p>
+        <a href="https://wa.me/917013681638" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition">
+          <i class="fa-brands fa-whatsapp text-lg"></i> Chat on WhatsApp
+        </a>
       </div>
     </div>
-  </footer>
+
+    <div class="pt-8 border-t border-slate-800 text-center sm:flex sm:items-center sm:justify-between text-xs text-slate-500">
+      <p>© 2026 Jobigator.com. All rights reserved.</p>
+      <p class="mt-2 sm:mt-0">Powered by Google Apps Script & GitHub Pages</p>
+    </div>
+  </div>
+</footer>
 
   <!-- SIGN UP MODAL -->
   <div id="signUpModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
