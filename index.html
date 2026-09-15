@@ -593,90 +593,98 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => { openModal('signUpModal'); }, 1200);
   }
 
-
+<!-- DIRECT APPLY & SIGN UP LOGIC -->
+<script>
   // Variable to store reference to the pre-opened browser tab
-let pendingWindow = null;
+  let pendingWindow = null;
 
-function handleDirectApply(e) {
-  if (e) e.preventDefault();
+  // Handles click on "Apply Directly"
+  function handleDirectApply(e) {
+    if (e) e.preventDefault();
 
-  const applyUrl = currentApplyingJob?.link;
-  if (!applyUrl || applyUrl === '#' || applyUrl === '') {
-    alert("Application link is not available for this job.");
-    return;
-  }
+    const applyUrl = currentApplyingJob?.link;
+    if (!applyUrl || applyUrl === '#' || applyUrl === '') {
+      alert("Application link is not available for this job.");
+      return;
+    }
 
-  if (currentUser) {
-    // 1. Signed-in users go straight to the job link in a new tab
-    window.open(applyUrl, '_blank', 'noopener,noreferrer');
-  } else {
-    // 2. Pre-open blank tab instantly (prevents browser popup blockers)
-    pendingWindow = window.open('about:blank', '_blank');
-
-    // Close the job detail modal and trigger your existing openModal function
-    closeModal('applyModal');
-    openModal('signUpModal');
-  }
-}
-
-async function handleSignUpSubmit(e) {
-  e.preventDefault();
-  const btn = document.getElementById('suSubmitBtn');
-  btn.innerText = "Signing Up...";
-  btn.disabled = true;
-
-  const name = document.getElementById('suName').value;
-  const rawPhone = document.getElementById('suPhone').value;
-  const phone = rawPhone.replace(/[^\d+]/g, ''); 
-  const email = document.getElementById('suEmail').value;
-
-  try {
-    const response = await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        action: 'signUp',
-        name: name,
-        phone: phone,
-        email: email
-      })
-    });
-
-    const result = await response.json();
-
-    if (result.status === 'success' || result.success) {
-      currentUser = { name, phone, email, savedJobs: [] };
-      localStorage.setItem('jobigator_user', JSON.stringify(currentUser));
-
-      closeModal('signUpModal');
-      renderAuthArea();
-      renderJobs(allJobs);
-
-      // Redirect pre-opened blank tab to target job URL
-      if (pendingWindow && currentApplyingJob?.link) {
-        pendingWindow.location.href = currentApplyingJob.link;
-        pendingWindow = null;
-      }
+    if (currentUser) {
+      // 1. Signed-in users go straight to the job link in a new tab
+      window.open(applyUrl, '_blank', 'noopener,noreferrer');
     } else {
-      // If sign up fails, close pre-opened tab so it doesn't hang open
+      // 2. Pre-open blank tab instantly to bypass popup blockers
+      pendingWindow = window.open('about:blank', '_blank');
+
+      // Close the job detail modal and open sign-up modal
+      closeModal('applyModal');
+      openModal('signUpModal');
+    }
+  }
+
+  // Handles Sign-Up form submission
+  async function handleSignUpSubmit(e) {
+    e.preventDefault();
+    const btn = document.getElementById('suSubmitBtn');
+    if (btn) {
+      btn.innerText = "Signing Up...";
+      btn.disabled = true;
+    }
+
+    const name = document.getElementById('suName').value;
+    const rawPhone = document.getElementById('suPhone').value;
+    const phone = rawPhone.replace(/[^\d+]/g, ''); 
+    const email = document.getElementById('suEmail').value;
+
+    try {
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          action: 'signUp',
+          name: name,
+          phone: phone,
+          email: email
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'success' || result.success) {
+        currentUser = { name, phone, email, savedJobs: [] };
+        localStorage.setItem('jobigator_user', JSON.stringify(currentUser));
+
+        closeModal('signUpModal');
+        if (typeof renderAuthArea === 'function') renderAuthArea();
+        if (typeof renderJobs === 'function') renderJobs(allJobs);
+
+        // Redirect pre-opened blank tab to target job URL
+        if (pendingWindow && currentApplyingJob?.link) {
+          pendingWindow.location.href = currentApplyingJob.link;
+          pendingWindow = null;
+        }
+      } else {
+        if (pendingWindow) {
+          pendingWindow.close();
+          pendingWindow = null;
+        }
+        alert("Sign up failed: " + (result.message || "Please try again."));
+      }
+    } catch (err) {
       if (pendingWindow) {
         pendingWindow.close();
         pendingWindow = null;
       }
-      alert("Sign up failed: " + (result.message || "Please try again."));
+      console.error("Sign-up error:", err);
+      alert("An error occurred during sign up. Please try again.");
+    } finally {
+      if (btn) {
+        btn.innerText = "Complete Free Sign-Up";
+        btn.disabled = false;
+      }
     }
-  } catch (err) {
-    if (pendingWindow) {
-      pendingWindow.close();
-      pendingWindow = null;
-    }
-    console.error("Sign-up error:", err);
-    alert("An error occurred during sign up. Please try again.");
-  } finally {
-    btn.innerText = "Complete Free Sign-Up";
-    btn.disabled = false;
   }
-}
+</script>
+  
 
 
   
