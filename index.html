@@ -586,7 +586,7 @@
   // Initial Load
 document.addEventListener("DOMContentLoaded", () => {
   renderAuthArea();
-  fetchJobs(); // fetchJobs will now handle direct URL deep links automatically
+  fetchJobs(); // Direct URL deep links handled inside fetchJobs
 
   // Show Sign Up Modal on first visit if user is not signed in
   if (!currentUser && !localStorage.getItem('jobigator_dismissed_signup')) {
@@ -602,7 +602,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById('filterExperience')?.addEventListener('change', filterJobs);
 });
 
-// Fetch Jobs from Firestore with Deep Link Check
+// Single Unified Fetch Jobs Function
 async function fetchJobs() {
   try {
     const { collection, getDocs } = window.firestoreTools;
@@ -617,7 +617,11 @@ async function fetchJobs() {
       // Skip expired jobs
       if (data.expired === true) return;
 
-      allJobs.push({ jobId: doc.id, ...data });
+      // Map doc.id as primary jobId, fallback to data.jobId if present
+      allJobs.push({ 
+        jobId: doc.id, 
+        ...data 
+      });
     });
 
     // Sort by postedOn date (Newest first)
@@ -625,10 +629,15 @@ async function fetchJobs() {
 
     // CHECK FOR DEEP LINK URL PARAMETER (?jobId=...)
     const urlParams = new URLSearchParams(window.location.search);
-    const targetJobId = urlParams.get('jobId');
+    const targetJobId = urlParams.get('jobId')?.trim();
 
     if (targetJobId) {
-      const targetJob = allJobs.find(j => j.jobId === targetJobId);
+      // Loose equality match against doc.id OR embedded jobId field
+      const targetJob = allJobs.find(j => 
+        String(j.jobId).toLowerCase() === targetJobId.toLowerCase() || 
+        (j.id && String(j.id).toLowerCase() === targetJobId.toLowerCase())
+      );
+
       if (targetJob) {
         showDirectJobBanner(targetJob);
         renderJobs([targetJob]); // Render ONLY the single targeted job
@@ -636,37 +645,7 @@ async function fetchJobs() {
       }
     }
 
-    // Default: Render all jobs if no deep link present
-    renderJobs(allJobs);
-  } catch (err) {
-    console.error("Error fetching jobs from Firestore:", err);
-  } finally {
-    const loader = document.getElementById('loader');
-    if (loader) loader.classList.add('hidden');
-  }
-}
-
-  // Fetch Jobs from Firestore
-async function fetchJobs() {
-  try {
-    const { collection, getDocs } = window.firestoreTools;
-    
-    // Fetch all docs from 'jobs' collection
-    const querySnapshot = await getDocs(collection(window.db, "jobs"));
-    
-    allJobs = [];
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      
-      // Skip expired jobs (handled as boolean in sync script)
-      if (data.expired === true) return;
-
-      allJobs.push({ jobId: doc.id, ...data });
-    });
-
-    // Sort by postedOn date in JS (Newest first)
-    allJobs.sort((a, b) => new Date(b.postedOn) - new Date(a.postedOn));
-
+    // Default: Render all jobs if no deep link present or target job not found
     renderJobs(allJobs);
   } catch (err) {
     console.error("Error fetching jobs from Firestore:", err);
@@ -696,7 +675,7 @@ function showDirectJobBanner(job) {
       </div>
       <div>
         <p class="text-sm font-bold text-slate-900">Viewing Shared Job</p>
-        <p class="text-xs text-slate-600">Showing details for target position at <strong>${escapeHtml(job.company)}</strong></p>
+        <p class="text-xs text-slate-600">Showing details for position at <strong>${escapeHtml(job.company)}</strong></p>
       </div>
     </div>
     <button onclick="clearDirectJobView()" class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-800 text-xs font-bold rounded-xl border border-slate-300 transition shrink-0 shadow-sm">
