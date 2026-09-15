@@ -641,6 +641,11 @@ async function fetchJobs() {
       if (targetJob) {
         showDirectJobBanner(targetJob);
         renderJobs([targetJob]); // Render ONLY the single targeted job
+        // Smoothly scroll to the banner and job card
+        setTimeout(() => {
+          document.getElementById('directJobBanner')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+        
         return;
       }
     }
