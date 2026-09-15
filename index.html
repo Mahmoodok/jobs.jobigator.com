@@ -836,14 +836,68 @@ function showDirectJobBanner() {
     }
 
 
-function shareJob(jobId) {
-  // 1. Find the job details from your allJobs array
-  const job = allJobs.find(j => j.jobId === jobId);
-  if (!job) return;
+// Initial Load
+document.addEventListener("DOMContentLoaded", () => {
+  renderAuthArea();
+  fetchJobs(); // fetchJobs will now handle direct URL deep links automatically
 
-  // 2. Construct the deep link pointing directly to this job ID
-  const baseUrl = window.location.origin + window.location.pathname;
-  const shareUrl = `${baseUrl}?jobId=${encodeURIComponent(jobId)}`;
+  // Show Sign Up Modal on first visit if user is not signed in
+  if (!currentUser && !localStorage.getItem('jobigator_dismissed_signup')) {
+    setTimeout(() => { openModal('signUpModal'); }, 1200);
+  }
+
+  // Event Listeners for Filters
+  document.getElementById('searchRole')?.addEventListener('input', filterJobs);
+  document.getElementById('searchCompany')?.addEventListener('input', filterJobs);
+  document.getElementById('searchLocation')?.addEventListener('input', filterJobs);
+  document.getElementById('filterType')?.addEventListener('change', filterJobs);
+  document.getElementById('filterSalary')?.addEventListener('change', filterJobs);
+  document.getElementById('filterExperience')?.addEventListener('change', filterJobs);
+});
+
+// Fetch Jobs from Firestore with Deep Link Check
+async function fetchJobs() {
+  try {
+    const { collection, getDocs } = window.firestoreTools;
+    
+    // Fetch all docs from 'jobs' collection
+    const querySnapshot = await getDocs(collection(window.db, "jobs"));
+    
+    allJobs = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      
+      // Skip expired jobs
+      if (data.expired === true) return;
+
+      allJobs.push({ jobId: doc.id, ...data });
+    });
+
+    // Sort by postedOn date (Newest first)
+    allJobs.sort((a, b) => new Date(b.postedOn) - new Date(a.postedOn));
+
+    // CHECK FOR DEEP LINK URL PARAMETER (?jobId=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetJobId = urlParams.get('jobId');
+
+    if (targetJobId) {
+      const targetJob = allJobs.find(j => j.jobId === targetJobId);
+      if (targetJob) {
+        showDirectJobBanner(targetJob);
+        renderJobs([targetJob]); // Render ONLY the single targeted job
+        return;
+      }
+    }
+
+    // Default: Render all jobs if no deep link present
+    renderJobs(allJobs);
+  } catch (err) {
+    console.error("Error fetching jobs from Firestore:", err);
+  } finally {
+    const loader = document.getElementById('loader');
+    if (loader) loader.classList.add('hidden');
+  }
+}
 
   // 3. Format the pre-filled text with the specific job details and link
   const text = `Check out this opening for ${job.jobTitle} at ${job.company}: ${shareUrl}`;
