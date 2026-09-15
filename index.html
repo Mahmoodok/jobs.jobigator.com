@@ -584,23 +584,67 @@
   let currentApplyingJob = null;
 
   // Initial Load
-  document.addEventListener("DOMContentLoaded", () => {
-    renderAuthArea();
-    fetchJobs();
+document.addEventListener("DOMContentLoaded", () => {
+  renderAuthArea();
+  fetchJobs(); // fetchJobs will now handle direct URL deep links automatically
 
-    // Show Sign Up Modal on first visit if user is not signed in
-    if (!currentUser && !localStorage.getItem('jobigator_dismissed_signup')) {
-      setTimeout(() => { openModal('signUpModal'); }, 1200);
+  // Show Sign Up Modal on first visit if user is not signed in
+  if (!currentUser && !localStorage.getItem('jobigator_dismissed_signup')) {
+    setTimeout(() => { openModal('signUpModal'); }, 1200);
+  }
+
+  // Event Listeners for Filters
+  document.getElementById('searchRole')?.addEventListener('input', filterJobs);
+  document.getElementById('searchCompany')?.addEventListener('input', filterJobs);
+  document.getElementById('searchLocation')?.addEventListener('input', filterJobs);
+  document.getElementById('filterType')?.addEventListener('change', filterJobs);
+  document.getElementById('filterSalary')?.addEventListener('change', filterJobs);
+  document.getElementById('filterExperience')?.addEventListener('change', filterJobs);
+});
+
+// Fetch Jobs from Firestore with Deep Link Check
+async function fetchJobs() {
+  try {
+    const { collection, getDocs } = window.firestoreTools;
+    
+    // Fetch all docs from 'jobs' collection
+    const querySnapshot = await getDocs(collection(window.db, "jobs"));
+    
+    allJobs = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      
+      // Skip expired jobs
+      if (data.expired === true) return;
+
+      allJobs.push({ jobId: doc.id, ...data });
+    });
+
+    // Sort by postedOn date (Newest first)
+    allJobs.sort((a, b) => new Date(b.postedOn) - new Date(a.postedOn));
+
+    // CHECK FOR DEEP LINK URL PARAMETER (?jobId=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetJobId = urlParams.get('jobId');
+
+    if (targetJobId) {
+      const targetJob = allJobs.find(j => j.jobId === targetJobId);
+      if (targetJob) {
+        showDirectJobBanner(targetJob);
+        renderJobs([targetJob]); // Render ONLY the single targeted job
+        return;
+      }
     }
 
-    // Event Listeners for Filters
-    document.getElementById('searchRole')?.addEventListener('input', filterJobs);
-    document.getElementById('searchCompany')?.addEventListener('input', filterJobs);
-    document.getElementById('searchLocation')?.addEventListener('input', filterJobs);
-    document.getElementById('filterType')?.addEventListener('change', filterJobs);
-    document.getElementById('filterSalary')?.addEventListener('change', filterJobs);
-    document.getElementById('filterExperience')?.addEventListener('change', filterJobs);
-  });
+    // Default: Render all jobs if no deep link present
+    renderJobs(allJobs);
+  } catch (err) {
+    console.error("Error fetching jobs from Firestore:", err);
+  } finally {
+    const loader = document.getElementById('loader');
+    if (loader) loader.classList.add('hidden');
+  }
+}
 
   // Fetch Jobs from Firestore
 async function fetchJobs() {
@@ -632,13 +676,49 @@ async function fetchJobs() {
   }
 }
 
-// Helper to show a "Viewing single job" alert with a reset button
-function showDirectJobBanner() {
-  const noResults = document.getElementById('noResults');
-  if (!noResults) return;
+// Helper to show a "Viewing single job" notification banner with a reset button
+function showDirectJobBanner(job) {
+  const container = document.getElementById('jobGrid')?.parentElement;
+  if (!container) return;
+
+  // Remove any existing banner
+  const existingBanner = document.getElementById('directJobBanner');
+  if (existingBanner) existingBanner.remove();
+
+  const banner = document.createElement('div');
+  banner.id = 'directJobBanner';
+  banner.className = "mb-6 p-4 bg-brand-50 border border-brand-200 rounded-2xl flex items-center justify-between gap-4";
   
-  // Optional: You can display a small banner at the top notifying the user
-  console.log("Viewing shared job directly via URL link.");
+  banner.innerHTML = `
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center shrink-0">
+        <i class="fa-solid fa-link text-base"></i>
+      </div>
+      <div>
+        <p class="text-sm font-bold text-slate-900">Viewing Shared Job</p>
+        <p class="text-xs text-slate-600">Showing details for target position at <strong>${escapeHtml(job.company)}</strong></p>
+      </div>
+    </div>
+    <button onclick="clearDirectJobView()" class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-800 text-xs font-bold rounded-xl border border-slate-300 transition shrink-0 shadow-sm">
+      View All Jobs
+    </button>
+  `;
+
+  container.insertBefore(banner, document.getElementById('jobGrid'));
+}
+
+// Clear single-job view and reset grid to show all jobs
+function clearDirectJobView() {
+  // Clear the URL parameter without reloading the page
+  const cleanUrl = window.location.origin + window.location.pathname;
+  window.history.replaceState({}, document.title, cleanUrl);
+
+  // Remove the banner
+  const banner = document.getElementById('directJobBanner');
+  if (banner) banner.remove();
+
+  // Re-render all jobs
+  renderJobs(allJobs);
 }
 
   // Render Cards Grid
