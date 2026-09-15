@@ -594,31 +594,31 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  // Variable to hold the job URL if a non-signed-in user clicks "Apply Directly"
-let pendingApplyLink = null;
+  // Variable to store reference to the pre-opened browser tab
+let pendingWindow = null;
 
-// Handle Direct Apply Click
 function handleDirectApply(e) {
-  e.preventDefault();
+  if (e) e.preventDefault();
 
   const applyUrl = currentApplyingJob?.link;
-  if (!applyUrl || applyUrl === '#') {
+  if (!applyUrl || applyUrl === '#' || applyUrl === '') {
     alert("Application link is not available for this job.");
     return;
   }
 
   if (currentUser) {
-    // Already signed up -> Go directly to the job link
-    window.open(applyUrl, '_blank');
+    // 1. Signed-in users go straight to the job link in a new tab
+    window.open(applyUrl, '_blank', 'noopener,noreferrer');
   } else {
-    // Not signed up -> Store target link, close job modal, open YOUR existing signUpModal
-    pendingApplyLink = applyUrl;
+    // 2. Pre-open blank tab instantly (prevents browser popup blockers)
+    pendingWindow = window.open('about:blank', '_blank');
+
+    // Close the job detail modal and trigger your existing openModal function
     closeModal('applyModal');
     openModal('signUpModal');
   }
 }
 
-// Update your handleSignUpSubmit to auto-open job link after submission
 async function handleSignUpSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById('suSubmitBtn');
@@ -631,7 +631,6 @@ async function handleSignUpSubmit(e) {
   const email = document.getElementById('suEmail').value;
 
   try {
-    // Send data to your Google Apps Script backend
     const response = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -653,15 +652,24 @@ async function handleSignUpSubmit(e) {
       renderAuthArea();
       renderJobs(allJobs);
 
-      // Automatically open the application link if user clicked "Apply Directly"
-      if (pendingApplyLink) {
-        window.open(pendingApplyLink, '_blank');
-        pendingApplyLink = null; // Reset state
+      // Redirect pre-opened blank tab to target job URL
+      if (pendingWindow && currentApplyingJob?.link) {
+        pendingWindow.location.href = currentApplyingJob.link;
+        pendingWindow = null;
       }
     } else {
+      // If sign up fails, close pre-opened tab so it doesn't hang open
+      if (pendingWindow) {
+        pendingWindow.close();
+        pendingWindow = null;
+      }
       alert("Sign up failed: " + (result.message || "Please try again."));
     }
   } catch (err) {
+    if (pendingWindow) {
+      pendingWindow.close();
+      pendingWindow = null;
+    }
     console.error("Sign-up error:", err);
     alert("An error occurred during sign up. Please try again.");
   } finally {
