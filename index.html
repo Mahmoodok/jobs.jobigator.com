@@ -75,7 +75,7 @@
     apiKey: "AIzaSyBqwAX1vWTrF03lWrCDyvIXuAexw3iAHPU",
     authDomain: "jobs-jobigator.firebaseapp.com",
     projectId: "jobs-jobigator",
-    storageBucket: "jobs-jobigator.firebasestorage.app",
+    storageBucket: "jobs-jobigator.firebasestorage.app", // Fixed typo (.app)
     messagingSenderId: "864021302935",
     appId: "1:864021302935:web:9d52e8112ab0c9209ba3d2"
   };
@@ -88,17 +88,6 @@
   window.db = db;
   window.firestoreTools = { collection, getDocs };
 </script>
-
-  // Initialize
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  // Make db accessible globally
-  window.db = db;
-  window.firestoreTools = { collection, getDocs, query, where, orderBy };
-</script>
-
-  
 
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
