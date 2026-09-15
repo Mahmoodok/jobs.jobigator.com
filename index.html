@@ -64,6 +64,33 @@
       }
     }
   </script>
+
+
+<!-- Firebase Web SDK v10 -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "jobigator.firebaseapp.com",
+    projectId: "jobigator",
+    storageBucket: "jobigator.appspot.com",
+    messagingSenderId: "...",
+    appId: "..."
+  };
+
+  // Initialize
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Make db accessible globally
+  window.db = db;
+  window.firestoreTools = { collection, getDocs, query, where, orderBy };
+</script>
+
+  
+
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
 
@@ -577,33 +604,30 @@
     document.getElementById('filterExperience')?.addEventListener('change', filterJobs);
   });
 
-  // Fetch Jobs from Apps Script
+  // Fetch Jobs from Apps Script/Firebase
 async function fetchJobs() {
   try {
-    const response = await fetch(`${APPS_SCRIPT_URL}?action=getJobs`);
-    const data = await response.json();
+    const { collection, getDocs, query, where, orderBy } = window.firestoreTools;
+    
+    // Query active jobs, ordered by latest posted date
+    const jobsRef = collection(window.db, "jobs");
+    const q = query(
+      jobsRef, 
+      where("expired", "!=", "yes"),
+      orderBy("expired"),
+      orderBy("createdAt", "desc") // Automatically sorts latest first!
+    );
 
-    if (data.status === "success") {
-      allJobs = data.jobs;
+    const querySnapshot = await getDocs(q);
+    
+    allJobs = [];
+    querySnapshot.forEach((doc) => {
+      allJobs.push({ jobId: doc.id, ...doc.data() });
+    });
 
-      // Check if URL has a specific jobId parameter (e.g. ?jobId=JOB-102)
-      const urlParams = new URLSearchParams(window.location.search);
-      const sharedJobId = urlParams.get('jobId');
-
-      if (sharedJobId) {
-        const specificJob = allJobs.filter(j => String(j.jobId) === String(sharedJobId));
-        if (specificJob.length > 0) {
-          renderJobs(specificJob); // Show only the shared job
-          showDirectJobBanner();   // Optional banner offering to show all jobs
-        } else {
-          renderJobs(allJobs);     // Fallback if the job ID wasn't found or expired
-        }
-      } else {
-        renderJobs(allJobs);
-      }
-    }
+    renderJobs(allJobs);
   } catch (err) {
-    console.error("Error fetching jobs:", err);
+    console.error("Error fetching jobs from Firestore:", err);
   } finally {
     const loader = document.getElementById('loader');
     if (loader) loader.classList.add('hidden');
