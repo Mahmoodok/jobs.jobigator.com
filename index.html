@@ -533,6 +533,89 @@
     </div>
   </div>
 
+  <!-- APPLY DIRECTLY SIGN UP MODAL -->
+
+<div id="applySignUpModal"
+     class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center hidden p-4">
+
+  <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative border border-slate-100">
+
+    <button
+      onclick="closeModal('applySignUpModal')"
+      class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-xl">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center mb-4 text-2xl">
+      <i class="fa-solid fa-user-plus"></i>
+    </div>
+
+    <h2 class="text-2xl font-black text-slate-900 mb-1">
+      Sign Up to Apply
+    </h2>
+
+    <p class="text-sm text-slate-500 mb-5">
+      Fill in your details to continue to the application.
+    </p>
+
+    <form
+      id="applySignUpForm"
+      onsubmit="handleApplySignUpSubmit(event)"
+      class="space-y-4">
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+          Full Name
+        </label>
+
+        <input
+          type="text"
+          id="asuName"
+          required
+          placeholder="e.g. Rahul Sharma"
+          class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-600 focus:border-brand-600 text-base font-medium outline-none transition">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+          WhatsApp Number
+        </label>
+
+        <input
+          type="tel"
+          id="asuPhone"
+          required
+          placeholder="+91 9876543210"
+          class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-600 focus:border-brand-600 text-base font-medium outline-none transition">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+          Email Address
+        </label>
+
+        <input
+          type="email"
+          id="asuEmail"
+          required
+          placeholder="rahul@example.com"
+          class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-600 focus:border-brand-600 text-base font-medium outline-none transition">
+      </div>
+
+      <button
+        type="submit"
+        id="asuSubmitBtn"
+        class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-base rounded-xl transition shadow-lg shadow-brand-600/20">
+
+        Continue to Apply
+
+      </button>
+
+    </form>
+
+  </div>
+</div>
+
   <!-- APPLY MODAL -->
   <div id="applyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative text-center border border-slate-100">
@@ -852,20 +935,24 @@ function clearDirectJobView() {
   
     // Apply Modal Handlers
 function openApplyModal(jobId) {
+
   const job = allJobs.find(j => j.jobId === jobId);
   if (!job) return;
 
   currentApplyingJob = job;
 
-  document.getElementById('applyModalTitle').innerText = job.jobTitle;
+  document.getElementById('applyModalTitle').innerText =
+    job.jobTitle;
+
   document.getElementById('applyModalCompany').innerText =
     `${job.company} • ${job.location}`;
 
-  const directApplyBtn = document.getElementById('directApplyBtn');
+  const directApplyBtn =
+    document.getElementById('directApplyBtn');
 
   if (directApplyBtn) {
 
-    // Set the actual application URL
+    // Store application URL
     directApplyBtn.href = job.link || '#';
 
     // Remove previous handler
@@ -873,30 +960,28 @@ function openApplyModal(jobId) {
 
     directApplyBtn.onclick = function(event) {
 
-      // ------------------------------------------
+      // -----------------------------------------
       // NON-SIGNED-IN USER
-      // ------------------------------------------
+      // -----------------------------------------
       if (!currentUser) {
 
-        // Prevent <a> from opening the job link
         event.preventDefault();
 
-        // Remember the job
+        // Remember selected job
         currentApplyingJob = job;
 
-        // Close Apply Modal first
+        // Close Apply Modal
         closeModal('applyModal');
 
-        // Open Signup Modal
-        openModal('signUpModal');
+        // Open ONLY the Apply-specific signup modal
+        openModal('applySignUpModal');
 
         return false;
       }
 
-      // ------------------------------------------
+      // -----------------------------------------
       // SIGNED-IN USER
-      // ------------------------------------------
-      // Normal target="_blank" behavior
+      // -----------------------------------------
       return true;
     };
   }
@@ -1131,116 +1216,198 @@ document.addEventListener('keydown', function (event) {
   }
 });
 
+// Sign Up Handler
+    async function handleSignUpSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('suSubmitBtn');
+      btn.innerText = "Signing Up...";
+      btn.disabled = true;
+
+      const name = document.getElementById('suName').value;
+      const rawPhone = document.getElementById('suPhone').value;
+      const phone = rawPhone.replace(/[^\d+]/g, ''); // Clean leading non-digits
+      const email = document.getElementById('suEmail').value;
+
+      try {
+        const url = `${APPS_SCRIPT_URL}?action=signup&name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phone)}&email=${encodeURIComponent(email)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.status === "success") {
+          currentUser = data.user;
+          localStorage.setItem('jobigator_user', JSON.stringify(currentUser));
+          closeModal('signUpModal');
+          renderAuthArea();
+          renderJobs(allJobs);
+        } else {
+          alert(data.message || "Failed to sign up.");
+        }
+      } catch (err) {
+        alert("An error occurred during sign up.");
+      } finally {
+        btn.innerText = "Free Sign-Up";
+        btn.disabled = false;
+      }
+    }
 
 
-    // Sign Up Handler
-async function handleSignUpSubmit(e) {
+  // =====================================================
+// APPLY DIRECTLY SIGNUP HANDLER
+// =====================================================
+
+async function handleApplySignUpSubmit(e) {
+
   e.preventDefault();
 
-  const btn = document.getElementById('suSubmitBtn');
+  const btn =
+    document.getElementById('asuSubmitBtn');
 
   btn.innerText = "Signing Up...";
   btn.disabled = true;
 
-  const name = document.getElementById('suName').value.trim();
-  const rawPhone = document.getElementById('suPhone').value.trim();
-  const phone = rawPhone.replace(/[^\d+]/g, '');
-  const email = document.getElementById('suEmail').value.trim();
+  const name =
+    document.getElementById('asuName').value.trim();
 
-  // Remember whether this signup came from Apply Directly
-  const isApplying = !!(
-    currentApplyingJob &&
-    currentApplyingJob.link
-  );
+  const rawPhone =
+    document.getElementById('asuPhone').value.trim();
 
-  const applicationLink = isApplying
-    ? currentApplyingJob.link
-    : null;
+  const phone =
+    rawPhone.replace(/[^\d+]/g, '');
 
-  // ---------------------------------------------
-  // IMPORTANT:
-  // If this signup came from Apply Directly,
-  // open the new tab NOW, while this function
-  // is still directly connected to the user's
-  // Continue button click.
-  // ---------------------------------------------
-  let applicationWindow = null;
+  const email =
+    document.getElementById('asuEmail').value.trim();
 
-  if (isApplying) {
 
-    applicationWindow = window.open(
+  // -----------------------------------------------
+  // Make sure a job exists
+  // -----------------------------------------------
+
+  if (!currentApplyingJob || !currentApplyingJob.link) {
+
+    alert(
+      "We couldn't identify the job you are trying to apply for."
+    );
+
+    btn.innerText = "Continue to Apply";
+    btn.disabled = false;
+
+    return;
+  }
+
+
+  const applicationLink =
+    currentApplyingJob.link;
+
+
+  // -----------------------------------------------
+  // Open new tab from the Continue button click
+  // -----------------------------------------------
+
+  const applicationWindow =
+    window.open(
       '',
       '_blank'
     );
 
-    // Show a loading page instead of a blank page
-    if (applicationWindow) {
 
-      applicationWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Preparing Application - Jobigator</title>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            body {
-              margin: 0;
-              min-height: 100vh;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              background: #f8fafc;
-              font-family: Arial, sans-serif;
-              color: #0f172a;
+  // -----------------------------------------------
+  // Loading screen inside new tab
+  // -----------------------------------------------
+
+  if (applicationWindow) {
+
+    applicationWindow.document.write(`
+
+      <!DOCTYPE html>
+
+      <html>
+
+      <head>
+
+        <title>Preparing Application - Jobigator</title>
+
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+        <style>
+
+          body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            font-family: Arial, sans-serif;
+            color: #0f172a;
+          }
+
+          .box {
+            text-align: center;
+            padding: 40px;
+          }
+
+          .spinner {
+            width: 42px;
+            height: 42px;
+            margin: 0 auto 20px;
+            border: 4px solid #dcfce7;
+            border-top-color: #16a34a;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+          }
+
+          h2 {
+            margin: 0 0 8px;
+            font-size: 22px;
+          }
+
+          p {
+            margin: 0;
+            color: #64748b;
+            font-size: 14px;
+          }
+
+          @keyframes spin {
+            to {
+              transform: rotate(360deg);
             }
+          }
 
-            .box {
-              text-align: center;
-              padding: 40px;
-            }
+        </style>
 
-            .spinner {
-              width: 42px;
-              height: 42px;
-              margin: 0 auto 20px;
-              border: 4px solid #dcfce7;
-              border-top-color: #16a34a;
-              border-radius: 50%;
-              animation: spin 0.8s linear infinite;
-            }
+      </head>
 
-            h2 {
-              margin: 0 0 8px;
-              font-size: 22px;
-            }
+      <body>
 
-            p {
-              margin: 0;
-              color: #64748b;
-              font-size: 14px;
-            }
+        <div class="box">
 
-            @keyframes spin {
-              to {
-                transform: rotate(360deg);
-              }
-            }
-          </style>
-        </head>
+          <div class="spinner"></div>
 
-        <body>
-          <div class="box">
-            <div class="spinner"></div>
-            <h2>Preparing your application...</h2>
-            <p>Please wait while we complete your sign-up.</p>
-          </div>
-        </body>
-        </html>
-      `);
+          <h2>
+            Preparing your application...
+          </h2>
 
-      applicationWindow.document.close();
-    }
+          <p>
+            Please wait while we complete your sign-up.
+          </p>
+
+        </div>
+
+      </body>
+
+      </html>
+
+    `);
+
+    applicationWindow.document.close();
   }
+
+
+  // -----------------------------------------------
+  // Send signup data to Google Apps Script
+  // -----------------------------------------------
 
   try {
 
@@ -1250,119 +1417,148 @@ async function handleSignUpSubmit(e) {
       `&phone=${encodeURIComponent(phone)}` +
       `&email=${encodeURIComponent(email)}`;
 
-    const response = await fetch(url);
 
-    const responseText = await response.text();
+    const response =
+      await fetch(url);
 
-    console.log("Signup response:", responseText);
+
+    const responseText =
+      await response.text();
+
+
+    console.log(
+      "Apply signup response:",
+      responseText
+    );
+
 
     let data;
 
     try {
-      data = JSON.parse(responseText);
+
+      data =
+        JSON.parse(responseText);
+
     } catch (jsonError) {
 
       console.error(
-        "Invalid JSON returned by signup API:",
+        "Invalid signup response:",
         responseText
       );
 
       throw new Error(
-        "The server returned an unexpected response."
+        "Invalid server response"
       );
     }
 
-    // ---------------------------------------------
+
+    // -----------------------------------------------
     // SUCCESS
-    // ---------------------------------------------
+    // -----------------------------------------------
+
     if (data.status === "success") {
 
-      currentUser = data.user;
+      // Save user
+      currentUser =
+        data.user;
 
       localStorage.setItem(
         'jobigator_user',
         JSON.stringify(currentUser)
       );
 
-      // Close signup modal
-      closeModal('signUpModal');
+
+      // Close Apply signup modal
+      closeModal(
+        'applySignUpModal'
+      );
+
 
       // Update website
       renderAuthArea();
       renderJobs(allJobs);
 
-      // ------------------------------------------
-      // OPEN APPLICATION
-      // ------------------------------------------
-      if (applicationLink) {
 
-        if (
-          applicationWindow &&
-          !applicationWindow.closed
-        ) {
+      // -------------------------------------------
+      // Redirect new application tab
+      // -------------------------------------------
 
-          // Redirect the already-created tab
-          applicationWindow.location.href =
-            applicationLink;
+      if (
+        applicationWindow &&
+        !applicationWindow.closed
+      ) {
 
-          // Clear reference
-          applicationWindow = null;
+        applicationWindow.location.href =
+          applicationLink;
 
-        } else {
+      } else {
 
-          // Browser blocked the new tab
-          // Fallback: open in current tab
-          window.location.href =
-            applicationLink;
-        }
-
-        currentApplyingJob = null;
+        // Fallback if browser blocked new tab
+        window.location.href =
+          applicationLink;
       }
+
+
+      // Clear selected job
+      currentApplyingJob =
+        null;
 
     } else {
 
-      // ------------------------------------------
+      // -------------------------------------------
       // SIGNUP FAILED
-      // ------------------------------------------
+      // -------------------------------------------
+
       alert(
         data.message ||
         "Failed to sign up. Please try again."
       );
 
-      // Close loading application tab
+
+      // Close loading tab
       if (
         applicationWindow &&
         !applicationWindow.closed
       ) {
+
         applicationWindow.close();
       }
     }
 
+
   } catch (err) {
 
     console.error(
-      "Sign up error:",
+      "Apply signup error:",
       err
     );
+
 
     alert(
       "An error occurred during sign up. Please try again."
     );
 
-    // Close loading tab if signup failed
+
+    // Close loading tab
     if (
       applicationWindow &&
       !applicationWindow.closed
     ) {
+
       applicationWindow.close();
     }
 
+
   } finally {
 
-    btn.innerText = "Continue";
-    btn.disabled = false;
+    btn.innerText =
+      "Continue to Apply";
+
+    btn.disabled =
+      false;
   }
 }
+  
 
     // Render User Header Profile State
     function renderAuthArea() {
