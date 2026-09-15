@@ -572,10 +572,9 @@
     </div>
   </div>
 
-  <!-- SCRIPT LOGIC -->
+ <!-- SCRIPT LOGIC -->
 <script>
   // Configuration
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzr2RTzuIxFPw5lIIge84IWTRveWKTf5OqCVlXL4_curFbWwpKs6slAlHgD7qDFABzv/exec"; 
   const WHATSAPP_NUMBER = "917013681638";
 
   // State Variables
@@ -603,43 +602,42 @@
   });
 
   // Fetch Jobs from Firestore
-async function fetchJobs() {
-  try {
-    const { collection, getDocs } = window.firestoreTools;
-    
-    // Fetch all docs from 'jobs' collection
-    const querySnapshot = await getDocs(collection(window.db, "jobs"));
-    
-    allJobs = [];
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
+  async function fetchJobs() {
+    try {
+      const { collection, getDocs } = window.firestoreTools;
       
-      // Skip expired jobs (handled as boolean in sync script)
-      if (data.expired === true) return;
+      // Fetch all docs from 'jobs' collection
+      const querySnapshot = await getDocs(collection(window.db, "jobs"));
+      
+      allJobs = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        
+        // Skip expired jobs (handled as boolean in sync script)
+        if (data.expired === true) return;
 
-      allJobs.push({ jobId: doc.id, ...data });
-    });
+        allJobs.push({ jobId: doc.id, ...data });
+      });
 
-    // Sort by postedOn date in JS (Newest first)
-    allJobs.sort((a, b) => new Date(b.postedOn) - new Date(a.postedOn));
+      // Sort by postedOn date in JS (Newest first)
+      allJobs.sort((a, b) => new Date(b.postedOn) - new Date(a.postedOn));
 
-    renderJobs(allJobs);
-  } catch (err) {
-    console.error("Error fetching jobs from Firestore:", err);
-  } finally {
-    const loader = document.getElementById('loader');
-    if (loader) loader.classList.add('hidden');
+      renderJobs(allJobs);
+    } catch (err) {
+      console.error("Error fetching jobs from Firestore:", err);
+    } finally {
+      const loader = document.getElementById('loader');
+      if (loader) loader.classList.add('hidden');
+    }
   }
-}
 
-// Helper to show a "Viewing single job" alert with a reset button
-function showDirectJobBanner() {
-  const noResults = document.getElementById('noResults');
-  if (!noResults) return;
-  
-  // Optional: You can display a small banner at the top notifying the user
-  console.log("Viewing shared job directly via URL link.");
-}
+  // Helper to show a "Viewing single job" alert with a reset button
+  function showDirectJobBanner() {
+    const noResults = document.getElementById('noResults');
+    if (!noResults) return;
+    
+    console.log("Viewing shared job directly via URL link.");
+  }
 
   // Render Cards Grid
   function renderJobs(jobs) {
@@ -744,8 +742,6 @@ function showDirectJobBanner() {
       let matchExp = true;
       if (exp !== "") {
         const jobExp = (j.experience || "").toLowerCase().trim();
-        
-        // Blank or combined tags (e.g. Fresher/Experienced) match all selections
         const isFlexible = !jobExp || (jobExp.includes("fresher") && jobExp.includes("experienced"));
 
         if (!isFlexible) {
@@ -773,382 +769,326 @@ function showDirectJobBanner() {
     renderJobs(allJobs);
   }
 
-  // Helper function to escape HTML special characters
-  function escapeHtml(str) {
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+  // Apply Modal Handlers
+  function openApplyModal(jobId) {
+    const job = allJobs.find(j => j.jobId === jobId);
+    if (!job) return;
+
+    currentApplyingJob = job;
+    document.getElementById('applyModalTitle').innerText = job.jobTitle;
+    document.getElementById('applyModalCompany').innerText = `${job.company} • ${job.location}`;
+    document.getElementById('directApplyBtn').href = job.link || '#';
+
+    const waMsg = encodeURIComponent(`Hello Jobigator, I need assistance applying for the position:\n\n*Job Title:* ${job.jobTitle}\n*Job ID:* ${job.jobId}\n*Company:* ${job.company}`);
+    document.getElementById('getHelpBtn').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`;
+
+    openModal('applyModal');
   }
-  
-    // Apply Modal Handlers
-    function openApplyModal(jobId) {
-      const job = allJobs.find(j => j.jobId === jobId);
-      if (!job) return;
 
-      currentApplyingJob = job;
-      document.getElementById('applyModalTitle').innerText = job.jobTitle;
-      document.getElementById('applyModalCompany').innerText = `${job.company} • ${job.location}`;
-      document.getElementById('directApplyBtn').href = job.link || '#';
+  function directHelp(jobId) {
+    const job = allJobs.find(j => j.jobId === jobId);
+    if (!job) return;
+    const waMsg = encodeURIComponent(`Hello Jobigator, I have a query regarding:\n\n*Job:* ${job.jobTitle} (ID: ${job.jobId})\n*Company:* ${job.company}`);
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`, '_blank');
+  }
 
-      const waMsg = encodeURIComponent(`Hello Jobigator, I need assistance applying for the position:\n\n*Job Title:* ${job.jobTitle}\n*Job ID:* ${job.jobId}\n*Company:* ${job.company}`);
-      document.getElementById('getHelpBtn').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`;
-
-      openModal('applyModal');
+  // Firestore Save Job Handler
+  async function toggleSave(jobId) {
+    if (!currentUser) {
+      alert("Saving jobs is only available for signed-in users.");
+      openModal('signUpModal');
+      return;
     }
 
-    function directHelp(jobId) {
-      const job = allJobs.find(j => j.jobId === jobId);
-      if (!job) return;
-      const waMsg = encodeURIComponent(`Hello Jobigator, I have a query regarding:\n\n*Job:* ${job.jobTitle} (ID: ${job.jobId})\n*Company:* ${job.company}`);
-      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`, '_blank');
-    }
-
-    // Save Job Handler
-    async function toggleSave(jobId) {
-      if (!currentUser) {
-        alert("Saving jobs is only available for signed-in users.");
-        openModal('signUpModal');
-        return;
-      }
-
-      try {
-        const response = await fetch(`${APPS_SCRIPT_URL}?action=toggleSaveJob&email=${encodeURIComponent(currentUser.email)}&jobId=${encodeURIComponent(jobId)}`);
-        const data = await response.json();
-
-        if (data.status === "limit_reached") {
-          alert("You can only save up to 10 jobs. Please remove a job from your saved list before adding a new one.");
-          return;
-        }
-
-        if (data.status === "success") {
-          currentUser.savedJobs = data.savedJobs;
+    try {
+      if (typeof window.handleToggleSaveJob === 'function') {
+        await window.handleToggleSaveJob(currentUser.email, jobId);
+        
+        // Re-fetch user document from Firestore to keep local state perfectly in sync
+        const userRef = window.firestoreTools.doc(window.db, "users", currentUser.email.trim().toLowerCase());
+        const userSnap = await window.firestoreTools.getDoc(userRef);
+        
+        if (userSnap.exists()) {
+          currentUser = userSnap.data();
           localStorage.setItem('jobigator_user', JSON.stringify(currentUser));
           renderJobs(allJobs);
           renderAuthArea();
         }
-      } catch (err) {
-        console.error("Error saving job:", err);
       }
+    } catch (err) {
+      console.error("Error toggling saved job in Firestore:", err);
     }
-
-
-function shareJob(jobId) {
-  // 1. Find the job details from your allJobs array
-  const job = allJobs.find(j => j.jobId === jobId);
-  if (!job) return;
-
-  // 2. Construct the deep link pointing directly to this job ID
-  const baseUrl = window.location.origin + window.location.pathname;
-  const shareUrl = `${baseUrl}?jobId=${encodeURIComponent(jobId)}`;
-
-  // 3. Format the pre-filled text with the specific job details and link
-  const text = `Check out this opening for ${job.jobTitle} at ${job.company}: ${shareUrl}`;
-
-  // 4. Store the sharing data temporarily for the modal
-  window.currentShareData = {
-    text: text,
-    shareUrl: shareUrl
-  };
-
-  // 5. Open the custom share modal
-  const modal = document.getElementById('shareJobModal');
-  if (modal) {
-    modal.classList.remove('hidden');
-
-    // Small animation
-    setTimeout(() => {
-      modal.classList.remove('opacity-0');
-
-      const modalContent = modal.querySelector('.share-modal-content');
-      if (modalContent) {
-        modalContent.classList.remove('scale-95');
-        modalContent.classList.add('scale-100');
-      }
-    }, 10);
   }
-}
 
+  function shareJob(jobId) {
+    const job = allJobs.find(j => j.jobId === jobId);
+    if (!job) return;
 
-// WhatsApp sharing
-function shareJobWhatsApp() {
-  if (!window.currentShareData) return;
+    const baseUrl = window.location.origin + window.location.pathname;
+    const shareUrl = `${baseUrl}?jobId=${encodeURIComponent(jobId)}`;
+    const text = `Check out this opening for ${job.jobTitle} at ${job.company}: ${shareUrl}`;
 
-  const { text } = window.currentShareData;
+    window.currentShareData = {
+      text: text,
+      shareUrl: shareUrl
+    };
 
-  window.open(
-    `https://wa.me/?text=${encodeURIComponent(text)}`,
-    '_blank'
-  );
+    const modal = document.getElementById('shareJobModal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        const modalContent = modal.querySelector('.share-modal-content');
+        if (modalContent) {
+          modalContent.classList.remove('scale-95');
+          modalContent.classList.add('scale-100');
+        }
+      }, 10);
+    }
+  }
 
-  closeShareJobModal();
-}
+  // WhatsApp sharing
+  function shareJobWhatsApp() {
+    if (!window.currentShareData) return;
+    const { text } = window.currentShareData;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    closeShareJobModal();
+  }
 
-
-// LinkedIn sharing
-function shareJobLinkedIn() {
-  if (!window.currentShareData) return;
-
-  const { shareUrl } = window.currentShareData;
-
-  window.open(
-    `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
-    '_blank'
-  );
-
-  closeShareJobModal();
-}
+  // LinkedIn sharing
+  function shareJobLinkedIn() {
+    if (!window.currentShareData) return;
+    const { shareUrl } = window.currentShareData;
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank');
+    closeShareJobModal();
+  }
 
   // Copy Link
-async function copyJobLink() {
+  async function copyJobLink() {
     if (!window.currentShareData) return;
-
     const { shareUrl } = window.currentShareData;
 
     try {
-        await navigator.clipboard.writeText(shareUrl);
-
-        closeShareJobModal();
-        showCopySuccess();
-
+      await navigator.clipboard.writeText(shareUrl);
+      closeShareJobModal();
+      showCopySuccess();
     } catch (error) {
-        console.error('Failed to copy link:', error);
+      console.error('Failed to copy link:', error);
 
-        const textArea = document.createElement('textarea');
-        textArea.value = shareUrl;
-        textArea.style.position = 'fixed';
-        textArea.style.opacity = '0';
+      const textArea = document.createElement('textarea');
+      textArea.value = shareUrl;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
 
-        document.body.appendChild(textArea);
-        textArea.select();
+      document.body.appendChild(textArea);
+      textArea.select();
 
-        try {
-            document.execCommand('copy');
-            showCopySuccess();
-        } catch (err) {
-            console.error('Fallback copy failed:', err);
-        }
+      try {
+        document.execCommand('copy');
+        showCopySuccess();
+      } catch (err) {
+        console.error('Fallback copy failed:', err);
+      }
 
-        document.body.removeChild(textArea);
-        closeShareJobModal();
+      document.body.removeChild(textArea);
+      closeShareJobModal();
     }
-}
+  }
 
-
-// "Job link copied!" notification
-function showCopySuccess() {
+  // Notification Toast
+  function showCopySuccess() {
     const toast = document.createElement('div');
-
     toast.innerHTML = `
-        <i class="fa-solid fa-circle-check text-emerald-500"></i>
-        <span>Job link copied!</span>
+      <i class="fa-solid fa-circle-check text-emerald-500"></i>
+      <span>Job link copied!</span>
     `;
 
     toast.className = `
-        fixed bottom-6 left-1/2 -translate-x-1/2
-        z-[10000]
-        flex items-center gap-2
-        bg-slate-900
-        text-white
-        text-sm font-medium
-        px-4 py-3
-        rounded-full
-        shadow-xl
-        transition-all duration-300
+      fixed bottom-6 left-1/2 -translate-x-1/2
+      z-[10000]
+      flex items-center gap-2
+      bg-slate-900
+      text-white
+      text-sm font-medium
+      px-4 py-3
+      rounded-full
+      shadow-xl
+      transition-all duration-300
     `;
 
     document.body.appendChild(toast);
 
     setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translate(-50%, 10px)';
+      toast.style.opacity = '0';
+      toast.style.transform = 'translate(-50%, 10px)';
     }, 1800);
 
     setTimeout(() => {
-        toast.remove();
+      toast.remove();
     }, 2200);
-}
-
-
-// Close modal
-function closeShareJobModal() {
-    // Your existing closeShareJobModal code...
-}
-
-
-// Close the share modal
-function closeShareJobModal() {
-  const modal = document.getElementById('shareJobModal');
-
-  if (!modal) return;
-
-  modal.classList.add('opacity-0');
-
-  const modalContent = modal.querySelector('.share-modal-content');
-
-  if (modalContent) {
-    modalContent.classList.remove('scale-100');
-    modalContent.classList.add('scale-95');
   }
 
-  setTimeout(() => {
-    modal.classList.add('hidden');
-  }, 200);
-}
+  // Close share modal
+  function closeShareJobModal() {
+    const modal = document.getElementById('shareJobModal');
+    if (!modal) return;
 
+    modal.classList.add('opacity-0');
+    const modalContent = modal.querySelector('.share-modal-content');
 
-// Close modal when clicking outside the modal content
-document.addEventListener('click', function (event) {
-  const modal = document.getElementById('shareJobModal');
-
-  if (modal && event.target === modal) {
-    closeShareJobModal();
-  }
-});
-
-
-// Close modal with Escape key
-document.addEventListener('keydown', function (event) {
-  if (event.key === 'Escape') {
-    closeShareJobModal();
-  }
-});
-
-
-
-    // Sign Up Handler
-    async function handleSignUpSubmit(e) {
-      e.preventDefault();
-      const btn = document.getElementById('suSubmitBtn');
-      btn.innerText = "Signing Up...";
-      btn.disabled = true;
-
-      const name = document.getElementById('suName').value;
-      const rawPhone = document.getElementById('suPhone').value;
-      const phone = rawPhone.replace(/[^\d+]/g, ''); // Clean leading non-digits
-      const email = document.getElementById('suEmail').value;
-
-      try {
-        const url = `${APPS_SCRIPT_URL}?action=signup&name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phone)}&email=${encodeURIComponent(email)}`;
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (data.status === "success") {
-          currentUser = data.user;
-          localStorage.setItem('jobigator_user', JSON.stringify(currentUser));
-          closeModal('signUpModal');
-          renderAuthArea();
-          renderJobs(allJobs);
-        } else {
-          alert(data.message || "Failed to sign up.");
-        }
-      } catch (err) {
-        alert("An error occurred during sign up.");
-      } finally {
-        btn.innerText = "Free Sign-Up";
-        btn.disabled = false;
-      }
+    if (modalContent) {
+      modalContent.classList.remove('scale-100');
+      modalContent.classList.add('scale-95');
     }
 
-    // Render User Header Profile State
-    function renderAuthArea() {
-      const authArea = document.getElementById('authArea');
-      if (currentUser) {
-        const count = currentUser.savedJobs ? currentUser.savedJobs.length : 0;
-        authArea.innerHTML = `
-          <div class="flex items-center gap-3">
-            <button onclick="openSavedJobsModal()" class="text-xs sm:text-sm font-bold px-3.5 py-2 bg-brand-50 text-brand-800 hover:bg-brand-100 rounded-xl border border-brand-200 transition flex items-center gap-2">
-              <i class="fa-solid fa-bookmark text-brand-600"></i> Saved <span class="bg-brand-200 text-brand-900 px-1.5 py-0.5 rounded-md text-[11px]">${count}/10</span>
-            </button>
-            <div class="text-right hidden sm:block">
-              <p class="text-sm font-bold text-slate-900 leading-tight">${escapeHtml(currentUser.name)}</p>
-              <p class="text-xs text-slate-500 font-medium">${escapeHtml(currentUser.email)}</p>
-            </div>
-            <button onclick="signOut()" class="text-slate-400 hover:text-red-600 p-2 text-base transition" title="Sign Out">
-              <i class="fa-solid fa-right-from-bracket"></i>
-            </button>
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 200);
+  }
+
+  // Close modal when clicking outside
+  document.addEventListener('click', function (event) {
+    const modal = document.getElementById('shareJobModal');
+    if (modal && event.target === modal) {
+      closeShareJobModal();
+    }
+  });
+
+  // Close modal with Escape key
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+      closeShareJobModal();
+    }
+  });
+
+  // Firestore Sign Up Handler
+  async function handleSignUpSubmit(e) {
+    e.preventDefault();
+    const btn = document.getElementById('suSubmitBtn');
+    btn.innerText = "Signing Up...";
+    btn.disabled = true;
+
+    const name = document.getElementById('suName').value;
+    const rawPhone = document.getElementById('suPhone').value;
+    const phone = rawPhone.replace(/[^\d+]/g, ''); 
+    const email = document.getElementById('suEmail').value;
+
+    try {
+      if (typeof window.handleUserSignUp === 'function') {
+        const userData = await window.handleUserSignUp(name, phone, email);
+        
+        currentUser = userData;
+        localStorage.setItem('jobigator_user', JSON.stringify(currentUser));
+        closeModal('signUpModal');
+        renderAuthArea();
+        renderJobs(allJobs);
+      }
+    } catch (err) {
+      console.error("Sign-up error:", err);
+      alert("An error occurred during sign up.");
+    } finally {
+      btn.innerText = "Free Sign-Up";
+      btn.disabled = false;
+    }
+  }
+
+  // Render User Header Profile State
+  function renderAuthArea() {
+    const authArea = document.getElementById('authArea');
+    if (currentUser) {
+      const count = currentUser.savedJobs ? currentUser.savedJobs.length : 0;
+      authArea.innerHTML = `
+        <div class="flex items-center gap-3">
+          <button onclick="openSavedJobsModal()" class="text-xs sm:text-sm font-bold px-3.5 py-2 bg-brand-50 text-brand-800 hover:bg-brand-100 rounded-xl border border-brand-200 transition flex items-center gap-2">
+            <i class="fa-solid fa-bookmark text-brand-600"></i> Saved <span class="bg-brand-200 text-brand-900 px-1.5 py-0.5 rounded-md text-[11px]">${count}/10</span>
+          </button>
+          <div class="text-right hidden sm:block">
+            <p class="text-sm font-bold text-slate-900 leading-tight">${escapeHtml(currentUser.name)}</p>
+            <p class="text-xs text-slate-500 font-medium">${escapeHtml(currentUser.email)}</p>
+          </div>
+          <button onclick="signOut()" class="text-slate-400 hover:text-red-600 p-2 text-base transition" title="Sign Out">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </div>
+      `;
+    } else {
+      authArea.innerHTML = `
+        <button onclick="openModal('signUpModal')" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl shadow-md shadow-brand-600/20 transition">
+          Free Sign-Up
+        </button>
+      `;
+    }
+  }
+
+  // Open Saved Jobs Modal
+  function openSavedJobsModal() {
+    const list = document.getElementById('savedJobsList');
+    list.innerHTML = '';
+
+    if (!currentUser || !currentUser.savedJobs || currentUser.savedJobs.length === 0) {
+      list.innerHTML = `<p class="text-base text-slate-500 font-medium text-center py-8">You haven't saved any jobs yet.</p>`;
+      openModal('savedJobsModal');
+      return;
+    }
+
+    currentUser.savedJobs.forEach(savedId => {
+      const activeJob = allJobs.find(j => j.jobId === savedId);
+      const item = document.createElement('div');
+      item.className = "p-4 border border-slate-200 rounded-2xl flex items-center justify-between gap-3 bg-slate-50";
+
+      if (activeJob) {
+        item.innerHTML = `
+          <div>
+            <h4 class="text-base font-bold text-slate-900">${escapeHtml(activeJob.jobTitle)}</h4>
+            <p class="text-xs font-semibold text-slate-500">${escapeHtml(activeJob.company)} • ${escapeHtml(activeJob.location)}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openApplyModal('${activeJob.jobId}')" class="px-3.5 py-1.5 bg-brand-600 text-white text-xs font-bold rounded-lg shadow-sm">Apply</button>
+            <button onclick="toggleSave('${activeJob.jobId}')" class="text-slate-400 hover:text-red-600 p-1.5 text-base" title="Remove"><i class="fa-solid fa-trash-can"></i></button>
           </div>
         `;
       } else {
-        authArea.innerHTML = `
-          <button onclick="openModal('signUpModal')" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl shadow-md shadow-brand-600/20 transition">
-            Free Sign-Up
-          </button>
+        item.innerHTML = `
+          <div>
+            <h4 class="text-sm font-bold text-slate-400 line-through">Job ID: ${savedId}</h4>
+            <p class="text-xs text-red-500 font-medium">This job has expired or was removed from our database.</p>
+          </div>
+          <button onclick="toggleSave('${savedId}')" class="text-slate-400 hover:text-red-600 p-1.5 text-base" title="Remove"><i class="fa-solid fa-trash-can"></i></button>
         `;
       }
+      list.appendChild(item);
+    });
+
+    openModal('savedJobsModal');
+  }
+
+  function signOut() {
+    localStorage.removeItem('jobigator_user');
+    currentUser = null;
+    renderAuthArea();
+    renderJobs(allJobs);
+  }
+
+  // Modal Helpers
+  function openModal(id) {
+    document.getElementById(id).classList.remove('hidden');
+  }
+  
+  function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+    if (id === 'signUpModal') {
+      localStorage.setItem('jobigator_dismissed_signup', 'true');
     }
+  }
 
-    // Open Saved Jobs Modal
-    function openSavedJobsModal() {
-      const list = document.getElementById('savedJobsList');
-      list.innerHTML = '';
-
-      if (!currentUser || !currentUser.savedJobs || currentUser.savedJobs.length === 0) {
-        list.innerHTML = `<p class="text-base text-slate-500 font-medium text-center py-8">You haven't saved any jobs yet.</p>`;
-        openModal('savedJobsModal');
-        return;
-      }
-
-      currentUser.savedJobs.forEach(savedId => {
-        const activeJob = allJobs.find(j => j.jobId === savedId);
-        const item = document.createElement('div');
-        item.className = "p-4 border border-slate-200 rounded-2xl flex items-center justify-between gap-3 bg-slate-50";
-
-        if (activeJob) {
-          item.innerHTML = `
-            <div>
-              <h4 class="text-base font-bold text-slate-900">${escapeHtml(activeJob.jobTitle)}</h4>
-              <p class="text-xs font-semibold text-slate-500">${escapeHtml(activeJob.company)} • ${escapeHtml(activeJob.location)}</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <button onclick="openApplyModal('${activeJob.jobId}')" class="px-3.5 py-1.5 bg-brand-600 text-white text-xs font-bold rounded-lg shadow-sm">Apply</button>
-              <button onclick="toggleSave('${activeJob.jobId}')" class="text-slate-400 hover:text-red-600 p-1.5 text-base" title="Remove"><i class="fa-solid fa-trash-can"></i></button>
-            </div>
-          `;
-        } else {
-          item.innerHTML = `
-            <div>
-              <h4 class="text-sm font-bold text-slate-400 line-through">Job ID: ${savedId}</h4>
-              <p class="text-xs text-red-500 font-medium">This job has expired or was removed from our database.</p>
-            </div>
-            <button onclick="toggleSave('${savedId}')" class="text-slate-400 hover:text-red-600 p-1.5 text-base" title="Remove"><i class="fa-solid fa-trash-can"></i></button>
-          `;
-        }
-        list.appendChild(item);
-      });
-
-      openModal('savedJobsModal');
-    }
-
-    function signOut() {
-      localStorage.removeItem('jobigator_user');
-      currentUser = null;
-      renderAuthArea();
-      renderJobs(allJobs);
-    }
-
-    // Modal Helpers
-    function openModal(id) {
-      document.getElementById(id).classList.remove('hidden');
-    }
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-      if (id === 'signUpModal') {
-        localStorage.setItem('jobigator_dismissed_signup', 'true');
-      }
-    }
-
-    // Utilities
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str).replace(/[&<>"']/g, function(m) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-      });
-    }
-  </script>
+  // Utility to escape HTML special characters
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>"']/g, function(m) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+    });
+  }
+</script>
 
  <!-- Floating Action Buttons Container -->
 <div class="fixed bottom-6 right-6 md:right-8 z-50 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 flex flex-col gap-3 items-center md:items-end">
