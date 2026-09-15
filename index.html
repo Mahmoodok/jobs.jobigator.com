@@ -580,8 +580,11 @@
 
   // State Variables
   let allJobs = [];
-  let currentUser = JSON.parse(localStorage.getItem('jobigator_user')) || null;
-  let currentApplyingJob = null;
+let currentUser = JSON.parse(localStorage.getItem('jobigator_user')) || null;
+let currentApplyingJob = null;
+
+// Holds the new tab opened during the Apply Directly click
+let pendingApplyWindow = null;
 
   // Initial Load
 document.addEventListener("DOMContentLoaded", () => {
@@ -856,47 +859,74 @@ function openApplyModal(jobId) {
   currentApplyingJob = job;
 
   document.getElementById('applyModalTitle').innerText = job.jobTitle;
-  document.getElementById('applyModalCompany').innerText = `${job.company} • ${job.location}`;
+  document.getElementById('applyModalCompany').innerText =
+    `${job.company} • ${job.location}`;
 
-  // Direct Apply button
+  // ----------------------------------------------------
+  // DIRECT APPLY BUTTON
+  // ----------------------------------------------------
   const directApplyBtn = document.getElementById('directApplyBtn');
 
   if (directApplyBtn) {
-    // Store the actual application link on the button
+
+    // Keep the real application URL on the button
     directApplyBtn.href = job.link || '#';
 
-    // Remove any previously attached handler
+    // Remove any previous click handler
     directApplyBtn.onclick = null;
 
-    // Handle Direct Apply click
     directApplyBtn.onclick = function (event) {
 
-      // If user is NOT signed in
+      // -----------------------------------------------
+      // USER IS NOT SIGNED IN
+      // -----------------------------------------------
       if (!currentUser) {
+
+        // Stop the <a> from following the link immediately
         event.preventDefault();
 
-        // Remember which job the user wants to apply for
+        // Remember the job
         currentApplyingJob = job;
 
-        // Open signup modal
+        // IMPORTANT:
+        // Open a blank tab immediately while this click
+        // is still considered a user action.
+        if (job.link) {
+          pendingApplyWindow = window.open(
+            'about:blank',
+            '_blank'
+          );
+        }
+
+        // Close Apply Modal FIRST
+        closeModal('applyModal');
+
+        // Then show Signup Modal
         openModal('signUpModal');
 
         return false;
       }
 
-      // If user is already signed in,
-      // allow the normal link to work
+      // -----------------------------------------------
+      // USER IS ALREADY SIGNED IN
+      // -----------------------------------------------
+      // Let the normal <a target="_blank"> behavior happen
       return true;
     };
   }
 
+  // WhatsApp Help link
   const waMsg = encodeURIComponent(
-    `Hello Jobigator, I need assistance applying for the position:\n\n*Job Title:* ${job.jobTitle}\n*Job ID:* ${job.jobId}\n*Company:* ${job.company}`
+    `Hello Jobigator, I need assistance applying for the position:\n\n` +
+    `*Job Title:* ${job.jobTitle}\n` +
+    `*Job ID:* ${job.jobId}\n` +
+    `*Company:* ${job.company}`
   );
 
   document.getElementById('getHelpBtn').href =
     `https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`;
 
+  // Open Apply Modal
   openModal('applyModal');
 }
 
@@ -1128,12 +1158,13 @@ async function handleSignUpSubmit(e) {
   btn.innerText = "Signing Up...";
   btn.disabled = true;
 
-  const name = document.getElementById('suName').value;
-  const rawPhone = document.getElementById('suPhone').value;
+  const name = document.getElementById('suName').value.trim();
+  const rawPhone = document.getElementById('suPhone').value.trim();
   const phone = rawPhone.replace(/[^\d+]/g, '');
-  const email = document.getElementById('suEmail').value;
+  const email = document.getElementById('suEmail').value.trim();
 
   try {
+
     const url =
       `${APPS_SCRIPT_URL}?action=signup` +
       `&name=${encodeURIComponent(name)}` +
@@ -1141,12 +1172,37 @@ async function handleSignUpSubmit(e) {
       `&email=${encodeURIComponent(email)}`;
 
     const response = await fetch(url);
-    const data = await response.json();
 
+    // Read response as TEXT first.
+    // This is safer for Google Apps Script responses.
+    const responseText = await response.text();
+
+    console.log("Signup response:", responseText);
+
+    let data;
+
+    try {
+      data = JSON.parse(responseText);
+    } catch (jsonError) {
+
+      console.error(
+        "Signup response is not valid JSON:",
+        responseText
+      );
+
+      throw new Error(
+        "The server returned an unexpected response."
+      );
+    }
+
+    // --------------------------------------------------
+    // SIGNUP SUCCESS
+    // --------------------------------------------------
     if (data.status === "success") {
 
-      // Save the newly signed-up user
+      // Save logged-in user
       currentUser = data.user;
+
       localStorage.setItem(
         'jobigator_user',
         JSON.stringify(currentUser)
@@ -1155,39 +1211,100 @@ async function handleSignUpSubmit(e) {
       // Close signup modal
       closeModal('signUpModal');
 
-      // Update UI
+      // Update website UI
       renderAuthArea();
       renderJobs(allJobs);
 
-      // -----------------------------------------
-      // CONTINUE TO APPLICATION AFTER SIGN-UP
-      // -----------------------------------------
+
+      // ------------------------------------------------
+      // CONTINUE TO THE JOB APPLICATION
+      // ------------------------------------------------
       if (currentApplyingJob && currentApplyingJob.link) {
 
         const applicationLink = currentApplyingJob.link;
 
-        // Small delay so the signup modal can close cleanly
-        setTimeout(() => {
-          window.open(
-            applicationLink,
-            '_blank',
-            'noopener,noreferrer'
-          );
-        }, 150);
+        // If the blank tab was successfully opened
+        // during the original Apply Directly click,
+        // navigate that tab to the real application URL.
+        if (
+          pendingApplyWindow &&
+          !pendingApplyWindow.closed
+        ) {
 
-        // Clear the pending job
+          pendingApplyWindow.location.href =
+            applicationLink;
+
+          pendingApplyWindow = null;
+
+        } else {
+
+          // Fallback:
+          // Try opening in a new tab.
+          const newWindow = window.open(
+            applicationLink,
+            '_blank'
+          );
+
+          if (!newWindow) {
+
+            // If browser still blocks it, provide
+            // a direct clickable fallback.
+            const shouldOpen = confirm(
+              "Your browser blocked the application tab. " +
+              "Would you like to open the application now?"
+            );
+
+            if (shouldOpen) {
+              window.location.href = applicationLink;
+            }
+          }
+        }
+
+        // Clear pending job
         currentApplyingJob = null;
       }
 
     } else {
-      alert(data.message || "Failed to sign up.");
+
+      // Signup API returned a proper response,
+      // but signup was not successful.
+      alert(
+        data.message ||
+        "Failed to sign up. Please try again."
+      );
+
+      // If a blank application tab was opened,
+      // close it because signup failed.
+      if (
+        pendingApplyWindow &&
+        !pendingApplyWindow.closed
+      ) {
+        pendingApplyWindow.close();
+        pendingApplyWindow = null;
+      }
     }
 
   } catch (err) {
+
     console.error("Sign up error:", err);
-    alert("An error occurred during sign up.");
+
+    alert(
+      "An error occurred during sign up. " +
+      "Please try again."
+    );
+
+    // Close the blank application tab if signup failed
+    if (
+      pendingApplyWindow &&
+      !pendingApplyWindow.closed
+    ) {
+      pendingApplyWindow.close();
+      pendingApplyWindow = null;
+    }
 
   } finally {
+
+    // Restore button
     btn.innerText = "Continue";
     btn.disabled = false;
   }
