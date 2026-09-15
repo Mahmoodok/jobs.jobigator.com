@@ -546,9 +546,9 @@
       <p id="applyModalCompany" class="text-sm font-medium text-slate-500 mb-6 mt-1"></p>
 
       <div class="space-y-3">
-        <a id="directApplyBtn" onclick="handleDirectApply(event)" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-base rounded-xl flex items-center justify-center gap-2.5 transition shadow-lg shadow-brand-600/20 cursor-pointer">
-  <i class="fa-solid fa-arrow-up-right-from-square"></i> Apply Directly
-</a>
+        <a id="directApplyBtn" href="#" target="_blank" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-base rounded-xl flex items-center justify-center gap-2.5 transition shadow-lg shadow-brand-600/20">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Apply Directly
+        </a>
         <a id="getHelpBtn" href="#" target="_blank" class="w-full py-3.5 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 font-bold text-base rounded-xl flex items-center justify-center gap-2.5 border border-emerald-200 transition">
           <i class="fa-brands fa-whatsapp text-xl text-emerald-600"></i> Get Help on WhatsApp
         </a>
@@ -592,8 +592,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!currentUser && !localStorage.getItem('jobigator_dismissed_signup')) {
     setTimeout(() => { openModal('signUpModal'); }, 1200);
   }
-
-
 
   // Event Listeners for Filters
   document.getElementById('searchRole')?.addEventListener('input', filterJobs);
@@ -1215,101 +1213,6 @@ document.addEventListener('keydown', function (event) {
       });
     }
   </script>
-
-<!-- DIRECT APPLY & SIGN UP LOGIC -->
-<script>
-  // Variable to store reference to the pre-opened browser tab
-  let pendingWindow = null;
-
-  // Handles click on "Apply Directly"
-  function handleDirectApply(e) {
-    if (e) e.preventDefault();
-
-    const applyUrl = currentApplyingJob?.link;
-    if (!applyUrl || applyUrl === '#' || applyUrl === '') {
-      alert("Application link is not available for this job.");
-      return;
-    }
-
-    if (currentUser) {
-      // 1. Signed-in users go straight to the job link in a new tab
-      window.open(applyUrl, '_blank', 'noopener,noreferrer');
-    } else {
-      // 2. Pre-open blank tab instantly to bypass popup blockers
-      pendingWindow = window.open('about:blank', '_blank');
-
-      // Close the job detail modal and open sign-up modal
-      closeModal('applyModal');
-      openModal('signUpModal');
-    }
-  }
-
-  // Handles Sign-Up form submission
-  async function handleSignUpSubmit(e) {
-    e.preventDefault();
-    const btn = document.getElementById('suSubmitBtn');
-    if (btn) {
-      btn.innerText = "Signing Up...";
-      btn.disabled = true;
-    }
-
-    const name = document.getElementById('suName').value;
-    const rawPhone = document.getElementById('suPhone').value;
-    const phone = rawPhone.replace(/[^\d+]/g, ''); 
-    const email = document.getElementById('suEmail').value;
-
-    try {
-      const response = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          action: 'signUp',
-          name: name,
-          phone: phone,
-          email: email
-        })
-      });
-
-      const result = await response.json();
-
-      if (result.status === 'success' || result.success) {
-        currentUser = { name, phone, email, savedJobs: [] };
-        localStorage.setItem('jobigator_user', JSON.stringify(currentUser));
-
-        closeModal('signUpModal');
-        if (typeof renderAuthArea === 'function') renderAuthArea();
-        if (typeof renderJobs === 'function') renderJobs(allJobs);
-
-        // Redirect pre-opened blank tab to target job URL
-        if (pendingWindow && currentApplyingJob?.link) {
-          pendingWindow.location.href = currentApplyingJob.link;
-          pendingWindow = null;
-        }
-      } else {
-        if (pendingWindow) {
-          pendingWindow.close();
-          pendingWindow = null;
-        }
-        alert("Sign up failed: " + (result.message || "Please try again."));
-      }
-    } catch (err) {
-      if (pendingWindow) {
-        pendingWindow.close();
-        pendingWindow = null;
-      }
-      console.error("Sign-up error:", err);
-      alert("An error occurred during sign up. Please try again.");
-    } finally {
-      if (btn) {
-        btn.innerText = "Complete Free Sign-Up";
-        btn.disabled = false;
-      }
-    }
-  }
-</script>
-  
-
-  
 
  <!-- Floating Action Buttons Container -->
 <div class="fixed bottom-6 right-6 md:right-8 z-50 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 flex flex-col gap-3 items-center md:items-end">
